@@ -22,13 +22,13 @@ export const themesConfig = {
       },
       primary: {
         light: "#64748b",
-        main: "#0f172a",
+        main: "#2E3786",
         dark: "#0f172a",
         contrastText: darkPaletteText.primary,
       },
       secondary: {
         light: "#eb224d",
-        main: "#eb224d",
+        main: "#FF6912",
         dark: "#3730a3",
         contrastText: darkPaletteText.primary,
       },

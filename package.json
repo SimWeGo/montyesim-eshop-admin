@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode dev",
+    "simwego": "vite --mode simwego",
     "qa": "vite --mode qa",
     "build": "vite build",
     "build:dev-mm-hub": "vite build --mode dev --outDir build",
