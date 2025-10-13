@@ -1,3 +1,4 @@
+import zIndex from "@mui/material/styles/zIndex";
 import { alpha } from "@mui/system";
 
 export const AsyncPaginateTheme = ({ theme }) => {
@@ -26,6 +27,7 @@ export const AsyncPaginateTheme = ({ theme }) => {
       },
       input: {
         color: isDarkMode ? "white" : "black",
+        zIndex: 9999,
       },
     }),
     menu: (base) => ({
@@ -56,9 +58,12 @@ export const AsyncPaginateTheme = ({ theme }) => {
         transition: "background-color 0.2s ease",
       };
     },
-    singleValue: (base) => ({
+
+    singleValue: (base, state) => ({
       ...base,
-      color: theme.palette.text.primary,
+      color: state.isDisabled
+        ? "rgb(149, 156, 169)"
+        : theme.palette.text.primary,
     }),
     dropdownIndicator: (base) => ({
       ...base,

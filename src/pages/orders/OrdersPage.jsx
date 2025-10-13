@@ -37,7 +37,7 @@ function OrdersPage() {
 
   const loadOptions = async (search, loadedOptions, { page }) => {
     const pageSize = 10;
-    const res = await getAllUsersDropdown({ page, pageSize, search });
+    const res = await getAllUsersDropdown({ page, pageSize, name: search });
     if (!res?.error) {
       return {
         options: res?.data?.map((item) => ({
@@ -119,12 +119,15 @@ function OrdersPage() {
     { name: "User Phone" },
     { name: "Bundle Name" },
     { name: "Amount" },
+    { name: "Promo Code" },
+    { name: "Referral Code" },
     { name: "Order Type" },
+    { name: "Order Status" },
     { name: "Payment Status" },
+
     { name: "Created At" },
   ];
 
-  console.log(data, "ddddddddddddddddd");
   return (
     <Card className="page-card">
       <Filters
@@ -189,7 +192,7 @@ function OrdersPage() {
               sx={{ minWidth: "200px" }}
               className={"max-w-[250px] truncate"}
             >
-              {el?.bundle_data
+              {el?.bundle_data && el?.bundle_data !== "-"
                 ? JSON.parse(el?.bundle_data)?.display_title
                 : "N/A"}
             </TableCell>
@@ -200,16 +203,35 @@ function OrdersPage() {
               {el?.currency}{" "}
               <CountUp
                 start={0}
-                end={el?.amount}
+                end={el?.amount / 100.0} //because the amount is from stripe by cent
                 duration={1.5}
                 separator=","
+                decimals={2}
               />
             </TableCell>
             <TableCell
               sx={{ minWidth: "200px" }}
               className={"max-w-[250px] truncate"}
             >
+              {el?.promo_code || "N/A"}
+            </TableCell>
+            <TableCell
+              sx={{ minWidth: "200px" }}
+              className={"max-w-[250px] truncate"}
+            >
+              {el?.referral_code || "N/A"}
+            </TableCell>
+            <TableCell
+              sx={{ minWidth: "200px" }}
+              className={"max-w-[250px] truncate"}
+            >
               {el?.order_type || "N/A"}
+            </TableCell>
+            <TableCell
+              sx={{ minWidth: "200px" }}
+              className={"max-w-[250px] truncate"}
+            >
+              <TagComponent value={el?.order_status} />
             </TableCell>
             <TableCell
               sx={{ minWidth: "200px" }}
@@ -233,7 +255,6 @@ function OrdersPage() {
         count={totalRows || 0}
         page={searchQueries?.page}
         onPageChange={(e, newPage) => {
-          console.log(newPage, "dddddddddddd");
           setSearchQueries({ ...searchQueries, page: newPage });
         }}
         rowsPerPage={searchQueries?.pageSize}

@@ -6,10 +6,10 @@ export const getAllBundles = async (page, pageSize, name, tags) => {
   const to = from + pageSize - 1;
 
   try {
-    if (name.trim() === "" && tags?.length === 0) {
+    if (name?.trim() === "" && tags?.length === 0) {
       const res = await api(() => {
         let query = supabase.from("bundle").select("*", { count: "exact" });
-        query = query.range(from, to).order("created_at", { ascending: true });
+        query = query.range(from, to).order("created_at", { ascending: false });
 
         return query;
       });
@@ -20,7 +20,7 @@ export const getAllBundles = async (page, pageSize, name, tags) => {
         let query = supabase.rpc("search_bundles", {
           p_page: page,
           p_page_size: pageSize,
-          p_search_term: name.trim(),
+          p_search_term: name?.trim(),
           p_tag_ids: tags,
         });
 
@@ -49,7 +49,21 @@ export const toggleBundleStatus = async ({ id, currentValue }) => {
 
       return query;
     });
-    console.log(res, "wwwwwwwwwwww");
+
+    const { data, error } = await supabase
+      .from("app_config")
+      .select("value")
+      .eq("key", "APP_CACHE_KEY")
+      .single();
+
+    if (!error) {
+      const newUuid = crypto.randomUUID();
+      const { error: updateError } = await supabase
+        .from("app_config")
+        .update({ value: newUuid })
+        .eq("key", "APP_CACHE_KEY");
+    }
+
     return res;
   } catch (error) {
     console.error("error in toggleBundleStatus:", error);
@@ -67,7 +81,21 @@ export const updateBundleTitle = async (payload) => {
 
       return query;
     });
-    console.log(res, "wwwwwwwwwwww");
+
+    const { data, error } = await supabase
+      .from("app_config")
+      .select("value")
+      .eq("key", "APP_CACHE_KEY")
+      .single();
+
+    if (!error) {
+      const newUuid = crypto.randomUUID();
+      const { error: updateError } = await supabase
+        .from("app_config")
+        .update({ value: newUuid })
+        .eq("key", "APP_CACHE_KEY");
+    }
+
     return res;
   } catch (error) {
     console.error("error in updateBundleTitle:", error);
@@ -89,8 +117,6 @@ export const getBundleTagsAndGroups = async (bundleId) => {
 
       return query;
     });
-
-    console.log(bundleRes, "checkkk1", bundleId);
 
     if (bundleRes?.error) {
       return bundleRes;
@@ -117,7 +143,6 @@ export const getBundleTagsAndGroups = async (bundleId) => {
         )
         .eq("bundle_id", bundleId);
     });
-    console.log(tagRes, "checkkk2");
 
     return {
       bundleName: bundleRes?.data?.bundle_name || null,
@@ -154,6 +179,7 @@ export const assignTagsToBundle = async (bundleId, tagIds) => {
     return upsertRes;
   }
 
+  console.log(tagIds, "ALL THE TAG IDS");
   // 2. Delete relations not in the selected list
   const deleteRes = await api(() => {
     let query = supabase
@@ -164,5 +190,44 @@ export const assignTagsToBundle = async (bundleId, tagIds) => {
     return query;
   });
 
+  //update cache key
+  const { data, error } = await supabase
+    .from("app_config")
+    .select("value")
+    .eq("key", "APP_CACHE_KEY")
+    .single();
+
+  if (!error) {
+    const newUuid = crypto.randomUUID();
+    const { error: updateError } = await supabase
+      .from("app_config")
+      .update({ value: newUuid })
+      .eq("key", "APP_CACHE_KEY");
+  }
+
   return { error: deleteRes?.error || upsertRes?.error };
+};
+
+export const getAllBundlesDropdown = async ({
+  page = 1,
+  pageSize = 10,
+  search = "",
+} = {}) => {
+  try {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const res = await api(() => {
+      let query = supabase.from("bundle").select(`data`, { count: "exact" });
+      if (search.trim() !== "") {
+        query = query.ilike("data->>bundle_code", `%${search}%`);
+      }
+
+      query = query.range(from, to).order("created_at", { ascending: false });
+      return query;
+    });
+    return res;
+  } catch (err) {
+    return { data: null, error: err, count: 0 };
+  }
 };

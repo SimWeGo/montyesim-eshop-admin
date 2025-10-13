@@ -143,7 +143,9 @@ function UsersPage() {
               sx={{ minWidth: "200px" }}
               className={"max-w-[250px] truncate"}
             >
-              {el?.name || "N/A"}
+              {el?.first_name || el?.last_name
+                ? `${el?.first_name || ""} ${el?.last_name || ""}`
+                : "N/A"}
             </TableCell>
             <TableCell
               sx={{ minWidth: "200px" }}
@@ -186,7 +188,6 @@ function UsersPage() {
         count={totalRows || 0}
         page={searchQueries?.page}
         onPageChange={(e, newPage) => {
-          console.log(newPage, "dddddddddddd");
           setSearchQueries({ ...searchQueries, page: newPage });
         }}
         rowsPerPage={searchQueries?.pageSize}

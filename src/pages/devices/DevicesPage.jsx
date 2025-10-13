@@ -61,7 +61,6 @@ function DevicesPage() {
           setLoading(false);
         });
     } catch (e) {
-      console.error("Device fetch failed:", e);
       toast.error("Failed to load devices");
 
       setLoading(false);
@@ -87,7 +86,7 @@ function DevicesPage() {
 
   const loadOptions = async (search, loadedOptions, { page }) => {
     const pageSize = 10;
-    const res = await getAllUsersDropdown({ page, pageSize, search });
+    const res = await getAllUsersDropdown({ page, pageSize, name: search });
     if (!res?.error) {
       return {
         options: res?.data?.map((item) => ({
@@ -216,7 +215,6 @@ function DevicesPage() {
         count={totalRows || 0}
         page={searchQueries?.page}
         onPageChange={(e, newPage) => {
-          console.log(newPage, "dddddddddddd");
           setSearchQueries({ ...searchQueries, page: newPage });
         }}
         rowsPerPage={searchQueries?.pageSize}

@@ -14,7 +14,7 @@ export const getAllGroups = async (page, pageSize, name, async = false) => {
         query = query.ilike("name", `%${name}%`);
       }
 
-      query = query.range(from, to).order("created_at", { ascending: true });
+      query = query.range(from, to).order("created_at", { ascending: false });
 
       return query;
     });
@@ -33,7 +33,7 @@ export const getGroupById = async (id) => {
         .from("tag_group")
         .select("*,tag(*)", { count: "exact" })
         .eq("id", id)
-        .order("created_at", { referencedTable: "tag", ascending: true })
+        .order("created_at", { referencedTable: "tag", ascending: false })
         .single();
 
       return query;
@@ -205,10 +205,9 @@ we need to clean up any uploaded icons for tags that were uploaded successfully.
 5Handling deleted tags: If a tag is deleted, we must ensure that its associated icon is cleaned up.
 */
   // 1. Upload icons
-  console.log(tagPayload, "tagg payload");
+
   const uploadResults = await Promise.all(
     tagPayload.map(async (tag) => {
-      console.log(tag, "ooooooo");
       try {
         const selectedTagRes = tag?.id
           ? await api(() => {

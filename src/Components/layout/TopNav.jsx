@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { userSignout } from "../../core/apis/usersAPI";
 import useRouteName from "../../core/hooks/useRouteName";
 import { SignOut } from "../../Redux/reducers/AuthReducer";
+import { toast } from "react-toastify";
 
 export default function TopNav({ setOpenSide }) {
   const isSmall = useMediaQuery("(max-width: 1024px)");
@@ -45,11 +46,9 @@ export default function TopNav({ setOpenSide }) {
 
   const handleSignOut = async () => {
     await userSignout().then((res) => {
-      console.log(res, "ressssssssssss");
       if (res?.error) {
-        console.log(res?.error?.code);
+        toast.error("Failed to signout");
       } else {
-        console.log(res, "ressssssssssss222");
         dispatch(SignOut());
       }
     });

@@ -13,6 +13,14 @@ import GroupsList from "../../pages/groups/GroupsList";
 import UserDetail from "../../pages/users/UserDetail";
 import GroupsHandle from "../../pages/groups/GroupsHandle";
 import AssignBundleToGroups from "../../pages/AssignBundleToGroups/AssignBundleToGroups";
+import RulesList from "../../pages/rules/RulesList";
+import PromotionsList from "../../pages/promotions/PromotionsList";
+import HandlePromotions from "../../pages/promotions/HandlePromotions";
+import PromoAnalysis from "../../pages/promotions/PromoAnalysis";
+import VoucherPage from "../../pages/vouchers/VoucherPage";
+import Settings from "../../pages/settings/Settings";
+import EditSettings from "../../pages/settings/EditSettings";
+import Referrals from "../../pages/referral/Referrals";
 
 export const privateRoutes = [
   {
@@ -105,6 +113,69 @@ export const privateRoutes = [
         key: "/tags",
         name: "Tags",
         regex: "^/tags/?$",
+      },
+      {
+        path: "/rules",
+        element: <RulesList />,
+        key: "/rules",
+        name: "Rules",
+        regex: "^/rules/?$",
+      },
+      {
+        path: "/vouchers",
+        element: <VoucherPage />,
+        key: "/vouchers",
+        name: "Vouchers",
+        regex: "^/vouchers/?$",
+      },
+      {
+        path: "/settings",
+        element: <Settings />,
+        key: "/settings",
+        name: "Settings",
+        regex: "^/settings/?$",
+      },
+      {
+        path: "/settings/edit",
+        element: <EditSettings />,
+        key: "/settings/edit",
+        name: "Edit Settings",
+        regex: "^/settings/edit/?$",
+      },
+      {
+        path: "/promotions",
+        element: <PromotionsList />,
+        key: "/promotions",
+        name: "Promotions",
+        regex: "^/promotions/?$",
+      },
+      {
+        path: "/promotions/add",
+        element: <HandlePromotions />,
+        key: "/promotions/add",
+        name: "Add Promotion",
+        regex: "^/promotions/add?$",
+      },
+      {
+        path: "/promotions/:id",
+        element: <HandlePromotions />,
+        key: "/promotions/:id",
+        name: "Edit Promotion",
+        regex: "^/promotions/([0-9a-fA-F-]+)?$",
+      },
+      {
+        path: "/promo-analysis",
+        element: <PromoAnalysis />,
+        key: "/promo-analysis",
+        name: "Promo Analysis",
+        regex: "^/promo-analysis/?$",
+      },
+      {
+        path: "/referrals",
+        element: <Referrals />,
+        key: "/referrals",
+        name: "Referrals",
+        regex: "^/referrals/?$",
       },
       {
         path: "*",

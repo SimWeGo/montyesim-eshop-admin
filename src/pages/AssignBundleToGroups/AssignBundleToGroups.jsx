@@ -75,19 +75,13 @@ export default function AssignBundleToGroups() {
       }
 
       const groupTags = groupTagMap[groupId]?.map((t) => t.id) || [];
-      console.log(
-        groupTagMap[groupId],
-        groupTags,
-        "check group tags",
-        selectedTags
-      );
+
+      // Fix: Compare IDs directly
       const clearedSelectedTags = selectedTags.filter(
-        (tag) => !groupTags.includes(tag.id)
+        (tagId) => !groupTags.includes(tagId)
       );
 
-      console.log(clearedSelectedTags);
-
-      setSelectedTags(clearedSelectedTags, "selectedd tag map");
+      setSelectedTags(clearedSelectedTags);
 
       setGroupTagMap((prev) => {
         const updatedMap = { ...prev };
@@ -135,15 +129,14 @@ export default function AssignBundleToGroups() {
 
   const onChangeGroups = (value) => {
     const newIds = value?.map((g) => g.value) || [];
-    console.log(value, "vvvvvvvvvvvvvv", newIds);
-    // Find removed groups
-    const removed =
-      selectedGroupes?.find((g) => !newIds.includes(g.value)) || null;
 
-    console.log(removed, "removedd ids ");
-    if (removed) {
-      removeFromGroupTagMapping(removed?.id);
-    }
+    // Find all removed groups
+    const removedGroups =
+      selectedGroupes?.filter((g) => !newIds.includes(g.value)) || [];
+
+    removedGroups.forEach((group) => {
+      removeFromGroupTagMapping(group?.id);
+    });
 
     setSelectedGroupes(value || []);
   };
@@ -175,7 +168,6 @@ export default function AssignBundleToGroups() {
     setLoading(true);
     getBundleTagsAndGroups(bundleId)
       .then((res) => {
-        console.log(res, "reeeeeeeeeeeeeeeeeee");
         if (!res?.error) {
           setBundleName(res?.bundleName);
           const tagsFromResponse = res?.data?.map((item) => item.tag?.id) ?? [];

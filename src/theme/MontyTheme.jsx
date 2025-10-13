@@ -130,6 +130,7 @@ function MontyTheme({ direction = "ltr", theme, children }) {
       MuiCard: CardTheme({ theme }),
       MuiTabs: TabsTheme({ theme }).MuiTabs,
       MuiTab: TabsTheme({ theme }).MuiTab,
+      MuiTabPanel: TabsTheme({ theme }).MuiTabPanel,
       MuiSelect: SelectTheme({ theme }),
       MuiTooltip: TooltipTheme({ theme }),
       ...DrawerTheme({ theme }),

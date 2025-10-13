@@ -1,4 +1,4 @@
-# Monty eSim EShop Admin
+# ADMIN OPEN SOURCE PROJECT
 
 ## **Introduction**
 
@@ -27,7 +27,7 @@ Before you begin, ensure you have the following software installed on your syste
 1. Clone the repo:
 
 ```bash
-   git clone https://github.com/montymobile1/montyesim-eshop-admin
+   git clone https://github.com/your-username/your-project-name.git
 ```
 
 2.Navigate into the project directory:

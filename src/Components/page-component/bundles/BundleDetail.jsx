@@ -12,8 +12,6 @@ import TooltipComponent from "../../shared/tooltip-component/TooltipComponent";
 const BundleDetail = ({ onClose, bundle }) => {
   const isSmall = useMediaQuery("(max-width: 639px)");
 
-  console.log(bundle, "bundleee detail");
-
   return (
     <Dialog fullWidth open={true} maxWidth={"sm"}>
       <DialogContent className={"flex flex-col gap-2"}>

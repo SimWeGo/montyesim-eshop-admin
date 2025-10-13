@@ -10,10 +10,11 @@ import {
   Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
 
 export function TableCustomHeader(props) {
   const { headers, actions } = props;
-  const { orderBy, sortedBy, requestSort, onAdd } = props;
+  const { orderBy, sortedBy, requestSort, onAdd, onEdit } = props;
 
   const handleRequestSort = (item) => {
     requestSort(item);
@@ -43,7 +44,7 @@ export function TableCustomHeader(props) {
         {actions && (
           <TableCell align="right">
             {onAdd && (
-              <Tooltip title={"Add new group"} placement={"top"}>
+              <Tooltip title={"Add new"} placement={"top"}>
                 <IconButton
                   color="primary"
                   aria-label="add"
@@ -52,6 +53,19 @@ export function TableCustomHeader(props) {
                   }}
                 >
                   <AddIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            {onEdit && (
+              <Tooltip title={"Edit"} placement={"top"}>
+                <IconButton
+                  color="primary"
+                  aria-label="add"
+                  onClick={(event) => {
+                    onEdit();
+                  }}
+                >
+                  <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
             )}

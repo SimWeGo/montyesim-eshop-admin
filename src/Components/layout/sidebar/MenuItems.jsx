@@ -4,7 +4,7 @@ import {
   Collapse,
   ListItemButton,
   ListItemText,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { truncateText } from "../../../core/helpers/utilFunctions";
@@ -42,6 +42,7 @@ const MenuItems = ({
             ? theme.palette.secondary.main
             : theme.palette.primary.main,
           ...getStyles(level),
+
           marginBottom: "1px",
           display: "flex",
           alignItems: "center",

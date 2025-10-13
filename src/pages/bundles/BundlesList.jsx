@@ -101,11 +101,11 @@ const BundleList = () => {
   };
 
   const tableHeaders = [
-    { name: "Id" },
+    { name: "ID" },
     { name: "Code" },
     { name: "Name" },
     { name: "Display Name" },
-    { name: "Is Active" },
+    // { name: "Is Active" },
 
     { name: "" },
   ];
@@ -255,14 +255,14 @@ const BundleList = () => {
             >
               {el?.bundle_name || "N/A"}
             </TableCell>
-            <TableCell sx={{ minWidth: "100px" }}>
+            {/* <TableCell sx={{ minWidth: "100px" }}>
               <Switch
                 color="success"
                 checked={el?.is_active}
                 onChange={() => handleBundleStatus(el)}
                 name="is_active"
               />
-            </TableCell>
+            </TableCell> */}
 
             <TableCell className={"whitespace-nowrap"}>
               <Tooltip title={"Assign Group"} placement={"top"}>

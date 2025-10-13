@@ -55,7 +55,7 @@ const schema = yup.object().shape({
               function (value) {
                 const { path, createError } = this;
                 const formValues = this.options.context || {};
-                console.log(formValues, "sssssssssssssss");
+
                 if (!formValues.name || formValues.name.trim() === "") {
                   if (!value || value.trim() === "") {
                     return createError({
@@ -146,12 +146,9 @@ const GroupsHandle = () => {
     }
   }, []);
 
-  console.log(getValues(), "get valuess", deletedTags);
-
   const handleSubmitForm = (payload) => {
     setIsSubmitting(true);
     let handleAPI = id ? editGroup : addGroup;
-    console.log(deletedTags, "deleted tags in handle");
 
     handleAPI({
       group: {
@@ -171,9 +168,8 @@ const GroupsHandle = () => {
       ...(id && { id: id }),
     })
       .then((res) => {
-        console.log(res, "resss");
         if (!res?.error) {
-          toast.success("Group added successfully");
+          toast.success(`Group ${id ? "edited" : "added"} successfully`);
           navigate(-1);
         } else {
           toast.error(res?.error || "An error occured");
@@ -401,7 +397,6 @@ const GroupsHandle = () => {
                         <IconButton
                           color="primary"
                           onClick={() => {
-                            console.log(el, "deleted row 1");
                             if (el?.id) {
                               deletedTags.push(el);
                             }
@@ -424,7 +419,6 @@ const GroupsHandle = () => {
                         <IconButton
                           color="primary"
                           onClick={() => {
-                            console.log(el, "deleted row 2");
                             remove(index);
                             if (el?.id) {
                               deletedTags.push(el);

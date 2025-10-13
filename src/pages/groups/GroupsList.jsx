@@ -6,7 +6,7 @@ import {
   Switch,
   TableCell,
   TablePagination,
-  TextField
+  TextField,
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -43,9 +43,9 @@ const GroupsList = () => {
 
     try {
       const { name, page, pageSize } = searchQueries;
-      console.log("hereeee", name, page, pageSize);
+
       const { data, error, count } = await getAllGroups(page, pageSize, name);
-      console.log(count, "www");
+
       if (error) {
         toast.error(error?.message);
         setLoading(false);
@@ -90,7 +90,6 @@ const GroupsList = () => {
 
   const handleDeleteGroup = () => {
     deleteGroup(openDelete?.data?.id).then((res) => {
-      console.log(res, "ress of deleting a group");
       if (res?.error) {
         if (res?.data?.code === "linked-bundles") {
           setOpenDelete({ open: false, data: null });
@@ -104,8 +103,6 @@ const GroupsList = () => {
     });
   };
 
-  console.log(data, "ddddddddddddddd");
-
   const handleGroupStatus = (group) => {
     toggleGroupStatus({ id: group?.id, currentValue: group?.is_active }).then(
       (res) => {
@@ -114,7 +111,6 @@ const GroupsList = () => {
         }
       }
     );
-    console.log(group);
   };
 
   return (
@@ -211,7 +207,6 @@ const GroupsList = () => {
           count={totalRows || 0}
           page={searchQueries?.page}
           onPageChange={(e, newPage) => {
-            console.log(newPage, "dddddddddddd");
             setSearchQueries({ ...searchQueries, page: newPage });
           }}
           rowsPerPage={searchQueries?.pageSize}

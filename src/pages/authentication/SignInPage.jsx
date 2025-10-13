@@ -42,7 +42,6 @@ export default function SignInPage() {
         password: payload.password,
       })
       .then((res) => {
-        console.log(res, "resss");
         if (res?.error) {
           toast.error(res?.error?.message || "Failed to Sign in");
           console.error("Error fetching data:", res?.error?.code);

@@ -1,0 +1,62 @@
+.form-date-picker {
+  display: flex;
+  flex-flow: column nowrap;
+
+  .react-date-range-picker {
+    input {
+      height: 40px;
+      width: 100%;
+      border-radius: 15px;
+      border: 1px solid rgba(0, 0, 0, 0.23);
+      color: black;
+      margin-left: 2px;
+    }
+    input:hover {
+      outline: none;
+      border: 1px solid var(--color-primary);
+    }
+    input:focus-visible {
+      outline: var(--color-primary) auto 0.5px;
+    }
+
+    input:disabled {
+      color: rgb(149, 156, 169);
+    }
+
+    input::placeholder {
+      color: rgba(0, 0, 0, 0.23);
+    }
+  }
+
+  .react-datepicker__close-icon::after {
+    background-color: var(--color-primary) !important;
+  }
+  .react-datepicker-popper button {
+    margin-top: 0px;
+  }
+}
+
+.date-input {
+  input {
+    cursor: pointer;
+  }
+
+  input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    background-color: transparent;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit {
+    color: inherit;
+    background-color: transparent;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-text,
+  input[type="date"]::-webkit-datetime-edit-month-field,
+  input[type="date"]::-webkit-datetime-edit-day-field,
+  input[type="date"]::-webkit-datetime-edit-year-field {
+    background-color: transparent;
+    color: inherit;
+    outline: none;
+  }
+  
+}

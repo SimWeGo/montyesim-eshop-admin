@@ -34,19 +34,6 @@ export const MenuRoutes = [
         languageCode: "en",
       },
     ],
-    menuAction: [
-      {
-        recordGuid: "4",
-        menuActionDetail: [
-          {
-            name: "View",
-            description: "View",
-            languageCode: "en",
-          },
-        ],
-        hasAccess: true,
-      },
-    ],
   },
   {
     parentName: null,
@@ -89,7 +76,7 @@ export const MenuRoutes = [
     displayOrder: 3,
     uri: "groups",
     iconUri: "fa-layer-group",
-    recordGuid: "6",
+    recordGuid: "5",
     position: 100,
     group: 1,
     menuDetail: [
@@ -106,7 +93,7 @@ export const MenuRoutes = [
     displayOrder: 3,
     uri: "bundles",
     iconUri: "fa-sim-card",
-    recordGuid: "5",
+    recordGuid: "6",
     position: 100,
     group: 1,
     menuDetail: [
@@ -116,5 +103,125 @@ export const MenuRoutes = [
         languageCode: "en",
       },
     ],
+  },
+  {
+    parentName: null,
+    parentGuid: null,
+    displayOrder: 3,
+    iconUri: "fa-percent",
+    recordGuid: "7",
+    position: 100,
+    group: 1,
+    menuDetail: [
+      {
+        name: "Promotions Management",
+        description: "Promotions Management",
+        languageCode: "en",
+      },
+    ],
+    children: [
+      {
+        parentName: null,
+        parentGuid: null,
+        displayOrder: 4,
+        uri: "rules",
+        recordGuid: "8",
+        position: 100,
+        group: 1,
+        menuDetail: [
+          {
+            name: "Rules",
+            description: "Rules",
+            languageCode: "en",
+          },
+        ],
+      },
+      {
+        parentName: null,
+        parentGuid: null,
+        displayOrder: 5,
+        uri: "promotions",
+        recordGuid: "9",
+        position: 100,
+        group: 1,
+        menuDetail: [
+          {
+            name: "Promotions",
+            description: "Promotion",
+            languageCode: "en",
+          },
+        ],
+      },
+      {
+        parentName: null,
+        parentGuid: null,
+        displayOrder: 6,
+        uri: "promo-analysis",
+        recordGuid: "10",
+        position: 100,
+        group: 1,
+        menuDetail: [
+          {
+            name: "Promo Analysis",
+            description: "Promo Analysis",
+            languageCode: "en",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    parentName: null,
+    parentGuid: null,
+    displayOrder: 7,
+    uri: "vouchers",
+    iconUri: "fa-gift",
+    recordGuid: "11",
+    position: 100,
+    group: 1,
+    menuDetail: [
+      {
+        name: "Vouchers",
+        description: "Vouchers",
+        languageCode: "en",
+      },
+    ],
+    children: [],
+  },
+  {
+    parentName: null,
+    parentGuid: null,
+    displayOrder: 8,
+    uri: "referrals",
+    iconUri: "fa-user-friends",
+    recordGuid: "12",
+    position: 100,
+    group: 1,
+    menuDetail: [
+      {
+        name: "Referrals",
+        description: "Referrals",
+        languageCode: "en",
+      },
+    ],
+    children: [],
+  },
+  {
+    parentName: null,
+    parentGuid: null,
+    displayOrder: 9,
+    uri: "settings",
+    iconUri: "fa-cog",
+    recordGuid: "13",
+    position: 100,
+    group: 1,
+    menuDetail: [
+      {
+        name: "Settings",
+        description: "Settings",
+        languageCode: "en",
+      },
+    ],
+    children: [],
   },
 ];

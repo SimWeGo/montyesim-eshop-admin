@@ -14,3 +14,11 @@ export const toggleTheme = () => {
 
 export const truncateText = (text, maxLength = 25) =>
   text?.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+
+export const escapeIlikeValue = (value) => {
+  // Escape % and _ because they are wildcards in ILIKE
+  let escaped = value.replace(/[%_]/g, (ch) => `\\${ch}`);
+  // Escape double quotes
+  escaped = escaped.replace(/"/g, '""');
+  return escaped;
+};

@@ -109,6 +109,7 @@
   }
 
   :root {
+    
     --error: var(--color-error);
     --warning: var(--color-warning);
     --success: var(--color-success);
@@ -168,7 +169,7 @@
 
 @layer components {
   .page-card {
-    @apply min-h-[80vh] bg-white rounded-xl p-4;
+    @apply flex flex-col gap-2 min-h-[80vh] bg-white rounded-xl p-4 ;
     overflow-y: scroll !important;
   }
 

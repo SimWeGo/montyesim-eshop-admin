@@ -41,5 +41,12 @@ export const TabsTheme = ({ theme }) => {
         },
       },
     },
+    MuiTabPanel: {
+      styleOverrides: {
+        root: {
+          padding: "10px 0px",
+        },
+      },
+    },
   };
 };

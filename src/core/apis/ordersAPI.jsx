@@ -19,7 +19,6 @@ export const getAllOrders = async ({ page, pageSize, user }) => {
 
       query = query.range(from, to);
 
-          console.error("fetch orders failed:", error);
       return query;
     });
 

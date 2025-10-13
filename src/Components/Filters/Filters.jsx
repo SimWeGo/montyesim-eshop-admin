@@ -31,7 +31,7 @@ export default function Filters({
         ...filterStyles,
         backgroundColor: theme.palette.background.default,
         padding: 2,
-        marginBottom: 1,
+
         width: "100%",
       }}
     >

@@ -1,9 +1,5 @@
 import { Delete, Upload } from "@mui/icons-material";
-import {
-  FormHelperText,
-  IconButton,
-  Slider
-} from "@mui/material";
+import { FormHelperText, IconButton, Slider } from "@mui/material";
 import { useRef, useState } from "react";
 import AvatarEditor from "react-avatar-editor";
 import Dropzone from "react-dropzone";
@@ -15,16 +11,11 @@ const AvatarEditorComponent = ({ open, value, onClose, updateImage }) => {
   const [slideValue, setSlideValue] = useState(10);
   const cropRef = useRef(null);
   const handleDrop = (dropped) => {
-    console.log(dropped, "dddd");
     setImage(dropped[0]);
   };
 
   const handleSave = async () => {
-    console.log("her111", cropRef);
     if (cropRef) {
-      console.log("her222", image);
-
-      console.log("her333");
       const dataUrl = cropRef?.current?.getImage().toDataURL();
       if (cropRef?.current) {
         const result = await fetch(dataUrl);
@@ -33,7 +24,6 @@ const AvatarEditorComponent = ({ open, value, onClose, updateImage }) => {
         updateImage(blob);
         onClose();
       } else {
-        console.log("her444");
         setImage(null);
         updateImage(null);
         onClose();

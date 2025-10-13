@@ -169,7 +169,6 @@ function ContactusPage() {
         count={totalRows || 0}
         page={searchQueries?.page}
         onPageChange={(e, newPage) => {
-          console.log(newPage, "dddddddddddd");
           setSearchQueries({ ...searchQueries, page: newPage });
         }}
         rowsPerPage={searchQueries?.pageSize}

@@ -3,7 +3,6 @@ import { cleanupTagUploadedIcons } from "./groupsAPI";
 import supabase from "./supabase";
 
 export const addTags = async (payload) => {
-  console.log(payload, "ddddddddd");
   try {
     const res = await api(() => {
       let query = supabase.from("tag").insert(
@@ -38,7 +37,7 @@ export const upsertTag = async (payload) => {
       );
       return query;
     });
-    
+
     return res;
   } catch (error) {
     console.error("error in upsertTag:", error);
@@ -47,18 +46,18 @@ export const upsertTag = async (payload) => {
 };
 export const deleteTags = async (payload) => {
   const Ids = payload?.map((el) => el?.id);
-  console.log(payload, "deleted tagsddddddddd", Ids);
+
   try {
     const res = await api(() => {
       let query = supabase.from("tag").delete().in("id", Ids);
       return query;
     });
-    
+
     console.log(res, "deleted tag res");
     if (!res?.error) {
       cleanupTagUploadedIcons(payload);
     }
-    
+
     return res;
   } catch (error) {
     console.error("error in deleteTags:", error);
@@ -96,7 +95,7 @@ export const getAllTags = async ({
     let query = supabase
       .from("tag")
       .select("*", { count: "exact" })
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
       .range(from, to);
 
     if (name.trim()) {
@@ -106,7 +105,6 @@ export const getAllTags = async ({
     const { data, error, count } = await query;
     return { data, error, count };
   } catch (err) {
-    console.error("Error fetching tags:", err);
     return { data: null, error: err, count: 0 };
   }
 };
@@ -125,8 +123,6 @@ export const getAllBundleTags = async ({
       });
       return query;
     });
-
-    console.log(res, "ooooooooooooooooooo");
 
     return {
       data: res?.data?.items,

@@ -12,7 +12,6 @@ import { store } from "./Redux/store";
 import MontyTheme from "./theme/MontyTheme";
 import themesConfig from "./theme/themesConfig";
 
-
 async function deleteDatabase(name) {
   return new Promise((resolve, reject) => {
     const request = indexedDB.deleteDatabase(name);
@@ -60,7 +59,6 @@ function App() {
         persistor
           .purge()
           .then(() => {
-            console.log("Redux Persist state purged.");
             localStorage.clear();
             sessionStorage.clear();
             clearAllCaches()

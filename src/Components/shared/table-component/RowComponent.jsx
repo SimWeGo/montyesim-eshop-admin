@@ -61,7 +61,7 @@ export function RowComponent(props) {
             )}
 
             {onEdit && (
-              <Tooltip title={"Edit group"} placement={"top"}>
+              <Tooltip title={"Edit"} placement={"top"}>
                 <IconButton
                   color="primary"
                   aria-label="edit"
@@ -74,7 +74,7 @@ export function RowComponent(props) {
               </Tooltip>
             )}
             {onDelete && (
-              <Tooltip title={"Delete group"} placement={"top"}>
+              <Tooltip title={"Delete"} placement={"top"}>
                 <IconButton
                   color="error"
                   aria-label="delete"
