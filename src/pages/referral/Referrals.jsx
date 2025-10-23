@@ -26,7 +26,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import { FileDownload } from "@mui/icons-material";
 import { exportReferralExcel } from "../users/helpers/exportExcel";
 import { AsyncPaginate } from "react-select-async-paginate";
-import { DefaultCurrency } from "../../core/vairables/EnumData";
 import { FormDate } from "../../Components/form-component/FormComponent";
 export default function Referrals() {
   const { id } = useParams();
@@ -318,7 +317,7 @@ export default function Referrals() {
               {el?.referral_code || "N/A"}
             </TableCell>
             <TableCell sx={{ minWidth: 140 }}>
-              {DefaultCurrency}{" "}
+              {el?.currency}{" "}
               <CountUp
                 start={0}
                 end={el?.amount}

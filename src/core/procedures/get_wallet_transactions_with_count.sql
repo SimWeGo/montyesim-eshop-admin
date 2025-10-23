@@ -22,6 +22,7 @@ begin
       uwt.wallet_id,
       uwt.amount,
       uwt.status,
+      uw.currency,
       uwt.source,
       uwt.created_at
     from user_wallet_transaction as uwt

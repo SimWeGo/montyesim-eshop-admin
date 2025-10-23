@@ -7,7 +7,6 @@ import TagComponent from "../../../Components/shared/tag-component/TagComponent"
 import RowComponent from "../../../Components/shared/table-component/RowComponent";
 import TableComponent from "../../../Components/shared/table-component/TableComponent";
 import { getAllWalletTransactions } from "../../../core/apis/usersAPI";
-import { DefaultCurrency } from "../../../core/vairables/EnumData";
 import CountUp from "react-countup";
 
 export default function WalletTransactionsTab() {
@@ -39,6 +38,7 @@ export default function WalletTransactionsTab() {
       const rows = res?.data || [];
       const mapped = rows.map((r) => ({
         id: r.id,
+        currency: r.currency,
         status: r.status,
         source: r.source,
         amount: r.amount,
@@ -79,7 +79,7 @@ export default function WalletTransactionsTab() {
             </TableCell>
 
             <TableCell sx={{ minWidth: 140 }}>
-              {DefaultCurrency}{" "}
+              {el?.currency}{" "}
               <CountUp
                 start={0}
                 end={el?.amount}
