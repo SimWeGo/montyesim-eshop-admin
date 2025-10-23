@@ -23,7 +23,9 @@ export const getAllVouchers = async ({ page, pageSize, search }) => {
 
     const userIds = [
       ...new Set(
-        voucherRes.data.map((order) => order.used_by).filter((id) => id != null)
+        voucherRes.data
+          ?.map((order) => order.used_by)
+          .filter((id) => id != null)
       ),
     ];
 
@@ -35,8 +37,8 @@ export const getAllVouchers = async ({ page, pageSize, search }) => {
 
     if (error) throw error;
 
-    const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
-    const enrichedOrders = voucherRes.data.map((order) => ({
+    const userMap = Object.fromEntries(users?.map((u) => [u.id, u]));
+    const enrichedOrders = voucherRes.data?.map((order) => ({
       ...order,
       user: userMap[order.used_by] || null,
     }));

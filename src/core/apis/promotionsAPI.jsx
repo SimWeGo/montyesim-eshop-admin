@@ -30,8 +30,8 @@ export const getAllPromotions = async (
       }
 
       if (bundles?.trim()) {
-        const bundleList = bundles?.split(",").map((b) => b.trim());
-        const bundleConditions = bundleList.map(
+        const bundleList = bundles?.split(",")?.map((b) => b.trim());
+        const bundleConditions = bundleList?.map(
           (code) => `bundle_code.ilike.%${code}%`
         );
 
@@ -260,7 +260,7 @@ export const getAllPromotionsUsage = async (
       return query;
     });
 
-    const userIds = [...new Set(promotionRes?.data.map((p) => p?.user_id))];
+    const userIds = [...new Set(promotionRes?.data?.map((p) => p?.user_id))];
 
     // Step 3: Fetch user_copy info
     const { data: users, error } = await supabase
