@@ -215,6 +215,7 @@ export const MenuRoutes = [
     recordGuid: "13",
     position: 100,
     group: 1,
+    superAdminAccess: true,
     menuDetail: [
       {
         name: "Settings",

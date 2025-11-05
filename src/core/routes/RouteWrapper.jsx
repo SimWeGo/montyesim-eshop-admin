@@ -16,6 +16,7 @@ const RouteWrapper = ({
   isAuthRestricted,
 }) => {
   const { isAuthenticated } = useSelector((state) => state.authentication);
+
   const [open, setOpen] = useState(true);
   const location = useLocation();
 

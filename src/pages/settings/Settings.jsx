@@ -21,9 +21,12 @@ import { getAllOrders } from "../../core/apis/ordersAPI";
 import { getAllUsersDropdown } from "../../core/apis/usersAPI";
 import { getAllSettings } from "../../core/apis/settingsAPI";
 import { useNavigate } from "react-router-dom";
+import PageNotFound from "../../Components/shared/fallbacks/page-not-found/PageNotFound";
+import { useSelector } from "react-redux";
 
 function Settings() {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.authentication);
   const [loading, setLoading] = useState(null);
   const [totalRows, setTotalRows] = useState(0);
   const [data, setData] = useState([]);
@@ -70,6 +73,10 @@ function Settings() {
     { name: "Value" },
     { name: "Created At" },
   ];
+
+  if (!user?.user_info?.email?.toLowerCase().includes("superadmin")) {
+    return <PageNotFound />;
+  }
 
   return (
     <Card className="page-card">

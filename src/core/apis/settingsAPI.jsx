@@ -18,8 +18,17 @@ export const getAllSettings = async () => {
   }
 };
 
-export const updateSettings = async (payload) => {
+export const updateSettings = async (payload, data) => {
   try {
+    const forbidden_countries_data = data?.find(
+      (el) => el?.key == "FORBIDDEN_COUNTRIES"
+    );
+
+    const cache_key_data = data?.find((el) => el?.key == "APP_CACHE_KEY");
+    const new_forbidden_countries = payload?.find(
+      (el) => el?.key == "FORBIDDEN_COUNTRIES"
+    );
+    const new_cache_key = payload?.find((el) => el?.key == "APP_CACHE_KEY");
     const res = await api(() => {
       let query = supabase
         .from("app_config")
@@ -28,6 +37,16 @@ export const updateSettings = async (payload) => {
       return query;
     });
 
+    if (
+      new_forbidden_countries?.value !== forbidden_countries_data?.value &&
+      new_cache_key?.value == cache_key_data?.value
+    ) {
+      const newUuid = crypto.randomUUID();
+      const { error: updateError } = await supabase
+        .from("app_config")
+        .update({ value: newUuid })
+        .eq("key", "APP_CACHE_KEY");
+    }
     return res;
   } catch (error) {
     throw error;

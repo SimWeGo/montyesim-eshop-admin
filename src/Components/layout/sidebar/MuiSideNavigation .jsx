@@ -2,13 +2,7 @@ import {
   KeyboardDoubleArrowLeft,
   KeyboardDoubleArrowRight,
 } from "@mui/icons-material";
-import {
-  Box,
-  Drawer,
-  IconButton,
-  List,
-  useMediaQuery
-} from "@mui/material";
+import { Box, Drawer, IconButton, List, useMediaQuery } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MenuRoutes } from "../../../core/routes/RouteVariables";
@@ -17,9 +11,11 @@ import { closedMixin, openedMixin } from "./MenuFunctions";
 import MenuItems from "./MenuItems";
 import MuiDrawerHeader from "./MuiDrawerHeader";
 import ToolTipMenu from "./ToolTipMenu";
+import { useSelector } from "react-redux";
 
 const MuiSideNavigation = ({ open, drawerWidth, setOpen }) => {
   const isSmall = useMediaQuery("(max-width: 1024px)");
+  const user = useSelector((state) => state.authentication);
   const location = useLocation();
   const pathName = location.pathname;
   const [openMenus, setOpenMenus] = useState(() => {
@@ -58,7 +54,11 @@ const MuiSideNavigation = ({ open, drawerWidth, setOpen }) => {
       if (!open && hasChildren) {
         return <ToolTipMenu key={index} item={item} IsActive={IsActive} />;
       }
-      return (
+
+      return item?.superAdminAccess &&
+        !user?.user_info?.email?.toLowerCase()?.includes("superadmin") ? (
+        ""
+      ) : (
         <MenuItems
           key={item?.recordGuid || index}
           item={item}

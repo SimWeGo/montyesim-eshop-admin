@@ -141,6 +141,7 @@ export const privateRoutes = [
         key: "/settings/edit",
         name: "Edit Settings",
         regex: "^/settings/edit/?$",
+        superAdminAccess: true,
       },
       {
         path: "/promotions",

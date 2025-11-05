@@ -9,6 +9,8 @@ import { FormInput } from "../../Components/form-component/FormComponent";
 import NoDataFound from "../../Components/shared/fallbacks/no-data-found/NoDataFound";
 import FormsSkeletons from "../../Components/shared/skeletons/FormsSkeletons";
 import { getAllSettings, updateSettings } from "../../core/apis/settingsAPI";
+import { useSelector } from "react-redux";
+import PageNotFound from "../../Components/shared/fallbacks/page-not-found/PageNotFound";
 
 const createDynamicSchema = (settingsData) => {
   if (!settingsData || !Array.isArray(settingsData)) {
@@ -43,7 +45,7 @@ const createDynamicSchema = (settingsData) => {
 
 const EditSettings = () => {
   const navigate = useNavigate();
-
+  const user = useSelector((state) => state.authentication);
   const [data, setData] = useState(null);
   const [loading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,11 +101,11 @@ const EditSettings = () => {
         const fieldName = setting.key.toLowerCase();
         return {
           key: setting.key,
-          value: payload[fieldName] || "",
+          value: payload[fieldName]?.trim() || "",
         };
       }) || [];
 
-    updateSettings(settingsPayload)
+    updateSettings(settingsPayload, data)
       .then((res) => {
         if (!res?.error) {
           toast.success(`Settings edited successfully`);
@@ -125,6 +127,10 @@ const EditSettings = () => {
   }
   if (!loading && !data) {
     return <NoDataFound text="Failed to load settings" />;
+  }
+
+  if (!user?.user_info?.email?.toLowerCase().includes("superadmin")) {
+    return <PageNotFound />;
   }
 
   return (

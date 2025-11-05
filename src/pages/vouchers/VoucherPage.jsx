@@ -53,7 +53,7 @@ export default function VoucherPage() {
       } else {
         setTotalRows(res.count);
         setData(
-          res.data?.map((el) => ({
+          res.data.map((el) => ({
             ...el,
             ...el?.metadata,
           }))
