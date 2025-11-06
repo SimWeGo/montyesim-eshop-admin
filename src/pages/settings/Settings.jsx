@@ -30,6 +30,7 @@ function Settings() {
   const [loading, setLoading] = useState(null);
   const [totalRows, setTotalRows] = useState(0);
   const [data, setData] = useState([]);
+  const [openAdd, setOpenAdd] = useState(false);
   const [searchQueries, setSearchQueries] = useState({
     pageSize: 10,
     page: 0,
@@ -73,10 +74,6 @@ function Settings() {
     { name: "Value" },
     { name: "Created At" },
   ];
-
-  if (!user?.user_info?.email?.toLowerCase().includes("superadmin")) {
-    return <PageNotFound />;
-  }
 
   return (
     <Card className="page-card">

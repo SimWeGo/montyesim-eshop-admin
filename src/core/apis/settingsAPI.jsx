@@ -18,7 +18,7 @@ export const getAllSettings = async () => {
   }
 };
 
-export const updateSettings = async (payload, data) => {
+export const updateSettings = async (payload, data, deletedItems) => {
   try {
     const forbidden_countries_data = data?.find(
       (el) => el?.key == "FORBIDDEN_COUNTRIES"
@@ -37,16 +37,24 @@ export const updateSettings = async (payload, data) => {
       return query;
     });
 
-    if (
-      new_forbidden_countries?.value !== forbidden_countries_data?.value &&
-      new_cache_key?.value == cache_key_data?.value
-    ) {
-      const newUuid = crypto.randomUUID();
-      const { error: updateError } = await supabase
-        .from("app_config")
-        .update({ value: newUuid })
-        .eq("key", "APP_CACHE_KEY");
+    if (!res?.error) {
+      // Perform delete
+      await api(() => {
+        return supabase.from("app_config").delete().in("key", deletedItems);
+      });
+
+      if (
+        new_forbidden_countries?.value !== forbidden_countries_data?.value &&
+        new_cache_key?.value == cache_key_data?.value
+      ) {
+        const newUuid = crypto.randomUUID();
+        const { error: updateError } = await supabase
+          .from("app_config")
+          .update({ value: newUuid })
+          .eq("key", "APP_CACHE_KEY");
+      }
     }
+
     return res;
   } catch (error) {
     throw error;

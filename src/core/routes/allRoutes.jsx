@@ -134,6 +134,7 @@ export const privateRoutes = [
         key: "/settings",
         name: "Settings",
         regex: "^/settings/?$",
+        superAdminAccess: true,
       },
       {
         path: "/settings/edit",

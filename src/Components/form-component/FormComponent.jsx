@@ -28,6 +28,7 @@ export const FormInput = (props) => {
     onChange,
     helperText,
     disabled,
+    label = "",
     endAdornment,
     value,
     type = "text",
@@ -41,6 +42,7 @@ export const FormInput = (props) => {
       value={value ?? ""}
       placeholder={placeholder}
       type={type}
+      label={label || ""}
       variant={variant}
       onChange={(e) => onChange(e.target.value)}
       helperText={helperText}

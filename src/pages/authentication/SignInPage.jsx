@@ -38,8 +38,8 @@ export default function SignInPage() {
 
     await supabase.auth
       .signInWithPassword({
-        email: payload.email,
-        password: payload.password,
+        email: payload.email?.trim(),
+        password: payload.password?.trim(),
       })
       .then((res) => {
         if (res?.error) {
