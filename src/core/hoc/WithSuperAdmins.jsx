@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import PageNotFound from "../../Components/shared/fallbacks/page-not-found/PageNotFound";
 import { useLocation } from "react-router-dom";
 
-export function WithSuperAdmin({ children }) {
+export function WithSuperAdmins({ children }) {
   const { pathname } = useLocation();
   const user = useSelector((state) => state.authentication);
   const [authorized, setAuthorized] = useState(false);

@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { privateRoutes, publicRoutes } from "./allRoutes";
-import { WithSuperAdmin } from "../hoc/withSuperAdmin";
+import { WithSuperAdmins } from "../hoc/WithSuperAdmins";
 
 const AppRouter = () => {
   return (
@@ -16,7 +16,7 @@ const AppRouter = () => {
                 path={child.path}
                 element={
                   child?.superAdminAccess ? (
-                    <WithSuperAdmin>{child.element}</WithSuperAdmin>
+                    <WithSuperAdmins>{child.element}</WithSuperAdmins>
                   ) : (
                     child.element
                   )
@@ -30,7 +30,7 @@ const AppRouter = () => {
             index={route?.index}
             element={
               route?.superAdminAccess ? (
-                <WithSuperAdmin>{route?.element}</WithSuperAdmin>
+                <WithSuperAdmins>{route?.element}</WithSuperAdmins>
               ) : (
                 route?.element
               )
