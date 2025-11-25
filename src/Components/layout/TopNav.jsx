@@ -12,21 +12,26 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import clsx from "clsx";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import MenuIcon from "@mui/icons-material/Menu";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { userSignout } from "../../core/apis/usersAPI";
 import useRouteName from "../../core/hooks/useRouteName";
 import { SignOut } from "../../Redux/reducers/AuthReducer";
 import { toast } from "react-toastify";
+import IconImage from "../shared/icon-image/IconImage";
+import { toggleSidebar } from "../../Redux/reducers/SidebarReducer";
 
-export default function TopNav({ setOpenSide }) {
+export default function TopNav() {
   const isSmall = useMediaQuery("(max-width: 1024px)");
 
   const { isAuthenticated } = useSelector((state) => state.authentication);
   const theme = useTheme();
   const dispatch = useDispatch();
+  const { pathname } = useLocation();
   const routeName = useRouteName();
   const navigate = useNavigate();
   // Menu state
@@ -54,31 +59,26 @@ export default function TopNav({ setOpenSide }) {
     });
   };
 
+  const pathnameLength = useMemo(() => {
+    return pathname.split("/")?.length;
+  }, [pathname]);
+
   return (
     <Box
-      className={clsx("w-full shadow-md sm:p-4  h-[80px]", {
-        ["rounded-xl"]: isAuthenticated,
-      })}
+      className={clsx("w-full shadow-md sm:p-4  h-[80px] fixed top-0 z-10")}
       sx={{ backgroundColor: theme.palette.background.paper }}
     >
-      <div className="flex items-center w-full h-[100%]">
+      <div className="flex items-center w-full h-[100%] justify-between">
         {isAuthenticated && isSmall && (
-          <Tooltip title="Open Menu">
-            <IconButton
-              onClick={() => {
-                setOpenSide((prev) => !prev);
-                localStorage.setItem("MenuOpen", !open);
-              }}
-            >
-              <KeyboardDoubleArrowRight fontSize="medium" color="primary" />{" "}
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            onClick={() => {
+              dispatch(toggleSidebar());
+            }}
+          >
+            <MenuIcon fontSize="medium" color="primary" />{" "}
+          </IconButton>
         )}
-        {isAuthenticated ? (
-          <Typography variant="h6" className="font-semibold truncate">
-            {routeName}
-          </Typography>
-        ) : (
+        {!isAuthenticated && (
           <button
             onClick={() => navigate("/signin")}
             className="flex items-center"

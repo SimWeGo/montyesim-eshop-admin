@@ -11,10 +11,11 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 
 export function TableCustomHeader(props) {
   const { headers, actions } = props;
-  const { orderBy, sortedBy, requestSort, onAdd, onEdit } = props;
+  const { orderBy, sortedBy, requestSort, onAdd, onEdit, onLogs } = props;
 
   const handleRequestSort = (item) => {
     requestSort(item);
@@ -53,6 +54,19 @@ export function TableCustomHeader(props) {
                   }}
                 >
                   <AddIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            {onLogs && (
+              <Tooltip title={"Logs"} placement={"top"}>
+                <IconButton
+                  color="primary"
+                  aria-label="add"
+                  onClick={(event) => {
+                    onLogs();
+                  }}
+                >
+                  <ContentPasteSearchIcon />
                 </IconButton>
               </Tooltip>
             )}

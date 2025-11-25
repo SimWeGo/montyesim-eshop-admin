@@ -32,8 +32,16 @@ const EditSettings = () => {
   const [loading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const { control, getValues, errors, handleSubmit, reset } = useForm({
+  const {
+    control,
+    getValues,
+    errors,
+    handleSubmit,
+    reset,
+    formState: { isDirty, dirtyFields },
+  } = useForm({
     resolver: yupResolver(schema),
+
     defaultValues: {},
     mode: "all",
   });
@@ -49,7 +57,7 @@ const EditSettings = () => {
       .then((res) => {
         if (!res?.error) {
           setData(res?.data);
-          console.log(res?.data);
+
           reset({ settings: res.data });
           setDeletedItems([]);
         } else {
@@ -73,7 +81,7 @@ const EditSettings = () => {
         };
       }) || [];
 
-    updateSettings(settingsPayload, data, deletedItems)
+    updateSettings(settingsPayload, data, deletedItems, user, isDirty)
       .then((res) => {
         if (!res?.error) {
           toast.success(`Settings edited successfully`);

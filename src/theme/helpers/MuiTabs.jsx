@@ -1,8 +1,6 @@
 import { alpha } from "@mui/system";
 
 export const TabsTheme = ({ theme }) => {
-  const isDarkMode = theme.palette.mode === "dark";
-
   return {
     MuiTabs: {
       styleOverrides: {
@@ -14,9 +12,7 @@ export const TabsTheme = ({ theme }) => {
           },
         },
         indicator: {
-          backgroundColor: isDarkMode
-            ? theme.palette.common.white
-            : theme.palette.primary.main,
+          backgroundColor: theme.palette.primary.main,
         },
       },
     },
@@ -27,16 +23,12 @@ export const TabsTheme = ({ theme }) => {
           minHeight: "48px",
           padding: "12px 16px",
           textTransform: "none",
-          color: isDarkMode
-            ? theme.palette.text.secondary
-            : theme.palette.text.primary, // ✅ Fixes dark mode text
+          color: theme.palette.text.primary,
           "&.Mui-selected": {
-            color: isDarkMode
-              ? theme.palette.text.primary
-              : theme.palette.primary.main, // ✅ Highlights selected tab
+            color: theme.palette.primary.main,
           },
           "&:hover": {
-            backgroundColor: alpha(theme.palette.primary.main, 0.1), // ✅ Adds hover effect
+            backgroundColor: alpha(theme.palette.primary.main, 0.1),
           },
         },
       },

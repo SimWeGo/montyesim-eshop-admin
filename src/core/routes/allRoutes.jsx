@@ -21,6 +21,8 @@ import VoucherPage from "../../pages/vouchers/VoucherPage";
 import Settings from "../../pages/settings/Settings";
 import EditSettings from "../../pages/settings/EditSettings";
 import Referrals from "../../pages/referral/Referrals";
+import SettingsLogs from "../../pages/settings/SettingsLogs";
+import SettingsLogsDetail from "../../pages/settings/SettingsLogsDetail";
 
 export const privateRoutes = [
   {
@@ -144,6 +146,15 @@ export const privateRoutes = [
         regex: "^/settings/edit/?$",
         superAdminAccess: true,
       },
+      {
+        path: "/settings/logs",
+        element: <SettingsLogs />,
+        key: "/settings/logs",
+        name: "Settings Logs",
+        regex: "^/settings/logs/?$",
+        superAdminAccess: true,
+      },
+
       {
         path: "/promotions",
         element: <PromotionsList />,

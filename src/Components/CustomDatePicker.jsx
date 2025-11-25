@@ -15,18 +15,15 @@ export default function CustomDatePicker({
   maxDate = null,
 }) {
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   let className;
 
   if (error) {
     className = "date-picker-error";
-  } else if (isDarkMode) {
-    className = "date-picker-dark";
   } else {
     className = "date-picker-light";
   }
-  
+
   return (
     <Grid item xs={12} sm={6} className={className}>
       <DatePicker
@@ -37,7 +34,6 @@ export default function CustomDatePicker({
         disabled={disabled}
         minDate={minDate}
         maxDate={maxDate}
-        className={` ${isDarkMode ? "theme-dark" : ""}`}
       />
 
       {error && (

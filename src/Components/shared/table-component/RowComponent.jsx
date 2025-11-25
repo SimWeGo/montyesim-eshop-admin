@@ -1,5 +1,5 @@
 //UTILITIES
-import { useState } from "react";
+import { useMemo, useState } from "react";
 //COMPONENT
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -28,8 +28,9 @@ export function RowComponent(props) {
   } = props;
   //VARIABLES
 
-  const [open] = useState(openCollapse);
-
+  const open = useMemo(() => {
+    return openCollapse;
+  }, [openCollapse]);
   //FUNCTIONS
 
   return (
@@ -104,12 +105,9 @@ export function RowComponent(props) {
         )}
       </TableRow>
       {open && (
-        <TableRow
-          className="collapse-row"
-          key={`${keyProps || row?.id}-collapse`}
-        >
+        <TableRow key={`${keyProps || row?.id}-collapse`}>
           <TableCell colSpan={colSpan}>
-            <Collapse in={open} timeout="auto" unmountOnExit>
+            <Collapse in={open} timeout={"auto"} unmountOnExit>
               {collapseComponent}
             </Collapse>
           </TableCell>

@@ -1,8 +1,6 @@
 import { alpha } from "@mui/system";
 
 export const DrawerTheme = ({ theme }) => {
-  const isDarkMode = theme.palette.mode === "dark";
-
   return {
     MuiDrawer: {
       styleOverrides: {
@@ -12,37 +10,15 @@ export const DrawerTheme = ({ theme }) => {
           borderRight: `1px solid ${theme.palette.divider}`,
           width: 280,
           display: "flex",
-          fontWeight:700,
+          fontWeight: 700,
           flexDirection: "column",
           overflowY: "auto",
           "&::-webkit-scrollbar": {
             width: "6px",
           },
           "&::-webkit-scrollbar-track": {
-            background: alpha(
-              isDarkMode
-                ? theme.palette.common.black
-                : theme.palette.common.white,
-              0.1
-            ),
+            background: alpha(theme.palette.common.white, 0.1),
             borderRadius: "4px",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            background: alpha(
-              isDarkMode
-                ? theme.palette.primary.light
-                : theme.palette.primary.dark,
-              0.6
-            ),
-            borderRadius: "4px",
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            background: alpha(
-              isDarkMode
-                ? theme.palette.primary.main
-                : theme.palette.primary.dark,
-              0.8
-            ),
           },
         },
       },
@@ -60,14 +36,10 @@ export const DrawerTheme = ({ theme }) => {
           "&:hover": {
             backgroundColor:
               theme.palette.background.hover ||
-           alpha(theme.palette.primary.main,0.09),
+              alpha(theme.palette.primary.main, 0.09),
           },
           "&.Mui-selected": {
-            // backgroundColor: theme.palette.primary.main,
             color: theme.palette.common.white,
-            // "&:hover": {
-            //   backgroundColor: theme.palette.primary.dark,
-            // },
           },
         },
       },

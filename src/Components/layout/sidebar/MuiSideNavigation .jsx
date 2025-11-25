@@ -1,20 +1,23 @@
-import {
-  KeyboardDoubleArrowLeft,
-  KeyboardDoubleArrowRight,
-} from "@mui/icons-material";
+import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Drawer, IconButton, List, useMediaQuery } from "@mui/material";
 import { useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { MenuRoutes } from "../../../core/routes/RouteVariables";
+import { MenuRoutes } from "../../../core/routes/Pages";
+import { toggleSidebar } from "../../../Redux/reducers/SidebarReducer";
 import IconImage from "../../shared/icon-image/IconImage";
-import { closedMixin, openedMixin } from "./MenuFunctions";
 import MenuItems from "./MenuItems";
 import MuiDrawerHeader from "./MuiDrawerHeader";
 import ToolTipMenu from "./ToolTipMenu";
-import { useSelector } from "react-redux";
 
-const MuiSideNavigation = ({ open, drawerWidth, setOpen }) => {
+const drawerWidthOpen = 250;
+const drawerWidthClosed = 90;
+
+const MuiSideNavigation = () => {
+  const open = useSelector((state) => state.sidebar?.open);
   const isSmall = useMediaQuery("(max-width: 1024px)");
+  const dispatch = useDispatch();
+
   const user = useSelector((state) => state.authentication);
   const location = useLocation();
   const pathName = location.pathname;
@@ -52,7 +55,14 @@ const MuiSideNavigation = ({ open, drawerWidth, setOpen }) => {
       const hasChildren = item?.children?.length > 0;
       const isClickable = !hasChildren;
       if (!open && hasChildren) {
-        return <ToolTipMenu key={index} item={item} IsActive={IsActive} />;
+        return (
+          <ToolTipMenu
+            key={index}
+            item={item}
+            IsActive={IsActive}
+            toggleMenu={toggleMenu}
+          />
+        );
       }
 
       return item?.superAdminAccess &&
@@ -75,25 +85,23 @@ const MuiSideNavigation = ({ open, drawerWidth, setOpen }) => {
       );
     });
 
-  const handleDrawerClose = (_, reason) => {
-    if (reason === "backdropClick" || reason === "escapeKeyDown") {
-      setOpen(false);
-    }
-  };
-
   return (
     <Drawer
-      variant={isSmall ? "temporary" : "permanent"}
-      open={open}
-      onClose={handleDrawerClose}
-      sx={(theme) => ({
-        width: "250px",
+      variant={isSmall ? null : "persistent"}
+      open={isSmall ? open : true}
+      anchor="left"
+      sx={{
+        width: open ? drawerWidthOpen : drawerWidthClosed,
         flexShrink: 0,
-        whiteSpace: "nowrap",
-        boxSizing: "border-box",
-        ...(open ? openedMixin(theme) : closedMixin(theme)),
-        "& .MuiDrawer-paper": open ? openedMixin(theme) : closedMixin(theme),
-      })}
+        "& .MuiDrawer-paper": {
+          width: open ? drawerWidthOpen : drawerWidthClosed,
+          transition: "width 0.3s",
+          overflowX: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: !open ? "center" : "",
+        },
+      }}
     >
       <MuiDrawerHeader>
         {open ? (
@@ -106,21 +114,19 @@ const MuiSideNavigation = ({ open, drawerWidth, setOpen }) => {
 
             <IconButton
               onClick={() => {
-                setOpen((prev) => !prev);
-                localStorage.setItem("MenuOpen", !open);
+                dispatch(toggleSidebar());
               }}
             >
-              <KeyboardDoubleArrowLeft fontSize="medium" color="primary" />{" "}
+              <MenuIcon fontSize="medium" color="primary" />{" "}
             </IconButton>
           </div>
         ) : (
           <IconButton
             onClick={() => {
-              setOpen((prev) => !prev);
-              localStorage.setItem("MenuOpen", !open);
+              dispatch(toggleSidebar());
             }}
           >
-            <KeyboardDoubleArrowRight fontSize="medium" color="primary" />{" "}
+            <MenuIcon fontSize="medium" color="primary" />{" "}
           </IconButton>
         )}{" "}
       </MuiDrawerHeader>{" "}

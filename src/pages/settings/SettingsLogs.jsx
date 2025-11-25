@@ -1,46 +1,42 @@
-//UTILITIES
-import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import CountUp from "react-countup";
-import { AsyncPaginate } from "react-select-async-paginate";
-import { toast } from "react-toastify";
-//COMPONENT
+import React, { useEffect, useState } from "react";
+import TableComponent from "../../Components/shared/table-component/TableComponent";
 import {
+  Accordion,
   Card,
-  FormControl,
+  IconButton,
   TableCell,
   TablePagination,
-  useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
-import Filters from "../../Components/Filters/Filters";
 import RowComponent from "../../Components/shared/table-component/RowComponent";
-import TableComponent from "../../Components/shared/table-component/TableComponent";
-import TagComponent from "../../Components/shared/tag-component/TagComponent";
-import { getAllOrders } from "../../core/apis/ordersAPI";
-import { getAllUsersDropdown } from "../../core/apis/usersAPI";
-import { getAllSettings } from "../../core/apis/settingsAPI";
+import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-import PageNotFound from "../../Components/shared/fallbacks/page-not-found/PageNotFound";
-import { useSelector } from "react-redux";
+import { getAllSettingsLogs } from "../../core/apis/settingsAPI";
+import { toast } from "react-toastify";
+import SettingsLogsDetail from "./SettingsLogsDetail";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
-function Settings() {
-  const navigate = useNavigate();
-  const user = useSelector((state) => state.authentication);
-  const [loading, setLoading] = useState(null);
+const SettingsLogs = () => {
+  const [loading, setLoading] = useState(false);
   const [totalRows, setTotalRows] = useState(0);
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
-  const [openAdd, setOpenAdd] = useState(false);
+  const [expand, setExpand] = useState(null);
   const [searchQueries, setSearchQueries] = useState({
     pageSize: 10,
     page: 0,
   });
 
-  const getOrders = async () => {
+  const tableHeaders = [{ name: "User" }, { name: "Updated At" }];
+
+  const getLogs = async () => {
     setLoading(true);
 
     try {
-      getAllSettings({ ...searchQueries })
+      const { page, pageSize, user } = searchQueries;
+      getAllSettingsLogs({
+        page,
+        pageSize,
+      })
         .then((res) => {
           if (res?.error) {
             toast.error(res?.error);
@@ -59,56 +55,58 @@ function Settings() {
           setLoading(false);
         });
     } catch (e) {
-      toast.error("Failed to load settings");
+      console.error("Failed to load devices:", e);
+      toast.error("Failed to load devices");
 
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    getOrders();
-  }, [searchQueries]);
-
-  const tableHeaders = [
-    { name: "Key" },
-    { name: "Value" },
-    { name: "Created At" },
-  ];
-
+    getLogs();
+  }, []);
   return (
     <Card className="page-card">
       <TableComponent
         loading={loading}
         dataPerPage={searchQueries?.pageSize}
-        tableData={data}
-        noDataFound={"No Setting Params Found"}
+        tableData={data || []}
+        noDataFound={"No logs found"}
         tableHeaders={tableHeaders}
         actions={true}
-        onEdit={() => navigate("/settings/edit")}
-        // onLogs={() => navigate("/settings/logs")}
       >
         {data?.map((el) => (
-          <RowComponent key={el?.id} actions={true}>
+          <RowComponent
+            openCollapse={expand == el?.id}
+            key={el?.id}
+            actions={false}
+            colSpan={3}
+            row={el}
+            collapseComponent={<SettingsLogsDetail data={el} />}
+          >
             <TableCell
               sx={{ minWidth: "200px" }}
               className={"max-w-[250px] truncate"}
             >
-              {el?.key || "N/A"}
-            </TableCell>
-            <TableCell
-              sx={{ minWidth: "200px" }}
-              className={"max-w-[250px] truncate"}
-            >
-              {el?.value || "N/A"}
+              {el?.changed_by || "N/A"}
             </TableCell>
 
             <TableCell
               sx={{ minWidth: "200px" }}
               className={"max-w-[250px] truncate"}
             >
-              {el?.created_at
-                ? dayjs(el?.created_at).format("DD-MM-YYYY HH:mm")
+              {el?.changed_at
+                ? dayjs(el?.changed_at).format("DD-MM-YYYY HH:mm")
                 : "N/A"}
+            </TableCell>
+            <TableCell>
+              <IconButton
+                onClick={() => {
+                  setExpand(expand == el?.id ? null : el?.id);
+                }}
+              >
+                <KeyboardArrowDownIcon />
+              </IconButton>
             </TableCell>
           </RowComponent>
         ))}
@@ -127,6 +125,6 @@ function Settings() {
       />
     </Card>
   );
-}
+};
 
-export default Settings;
+export default SettingsLogs;

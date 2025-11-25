@@ -33,7 +33,6 @@ export const getAllBundles = async (page, pageSize, name, tags) => {
       };
     }
   } catch (error) {
-    console.error("error in getAllBundles:", error);
     throw error;
   }
 };
@@ -66,7 +65,6 @@ export const toggleBundleStatus = async ({ id, currentValue }) => {
 
     return res;
   } catch (error) {
-    console.error("error in toggleBundleStatus:", error);
     throw error;
   }
 };
@@ -98,7 +96,6 @@ export const updateBundleTitle = async (payload) => {
 
     return res;
   } catch (error) {
-    console.error("error in updateBundleTitle:", error);
     throw error;
   }
 };
@@ -150,7 +147,6 @@ export const getBundleTagsAndGroups = async (bundleId) => {
       error: tagRes?.error || bundleRes?.error,
     };
   } catch (error) {
-    console.error("error in getBundleTagsAndGroups:", error);
     throw error;
   }
 };
@@ -175,11 +171,9 @@ export const assignTagsToBundle = async (bundleId, tagIds) => {
     return query;
   });
   if (upsertRes?.error) {
-    console.error("Error upserting tags:", upsertRes?.error);
     return upsertRes;
   }
 
-  console.log(tagIds, "ALL THE TAG IDS");
   // 2. Delete relations not in the selected list
   const deleteRes = await api(() => {
     let query = supabase

@@ -67,7 +67,6 @@ export const getAllReferralTransactions = async (
   from_user,
   referral_date
 ) => {
-  console.log(from_user, referral_date);
   const offset = page * pageSize;
 
   const { data, error } = await supabase.rpc(

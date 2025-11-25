@@ -1,7 +1,7 @@
 import React from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { Link } from "react-router-dom";
-import { INDEX_ROUTE } from "../../../core/routes/RouteVariables";
+import { INDEX_ROUTE } from "../../../core/routes/Pages";
 
 const IconImage = () => {
   return (
@@ -9,7 +9,7 @@ const IconImage = () => {
       <LazyLoadImage
         alt={"mtn-logo"}
         src={"/logo/logo.png"}
-        width={60}
+        width={120}
         height={60}
       />
     </Link>

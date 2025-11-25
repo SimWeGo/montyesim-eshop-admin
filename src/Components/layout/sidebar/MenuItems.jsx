@@ -11,7 +11,7 @@ import { truncateText } from "../../../core/helpers/utilFunctions";
 
 const MenuItems = ({
   item,
-  level,
+  level = 0,
   hasChildren,
   toggleMenu,
   isClickable,
@@ -23,17 +23,16 @@ const MenuItems = ({
 }) => {
   const theme = useTheme();
 
-  const getFontSize = (level) => {
-    const size = 14 - parseInt(level) * 10;
-    const result = `${size}px`;
-    return result;
+  const getFontSize = (level) => `${14 - level * 2}px`;
+
+  const handleClick = () => {
+    if (hasChildren) toggleMenu(item.recordGuid);
   };
+
   return (
     <div key={item.recordGuid} style={{ marginLeft: level * 20 }}>
       <ListItemButton
-        onClick={() => {
-          if (hasChildren) toggleMenu(item.recordGuid);
-        }}
+        onClick={handleClick}
         to={isClickable ? `/${item.uri}` : undefined}
         component={isClickable ? Link : "div"}
         sx={{
@@ -42,12 +41,10 @@ const MenuItems = ({
             ? theme.palette.secondary.main
             : theme.palette.primary.main,
           ...getStyles(level),
-
           marginBottom: "1px",
           display: "flex",
           alignItems: "center",
           fontSize: getFontSize(level),
-          // borderLeft: IsActive(item) ? `5px solid ` : `5px solid transperant`,
           fontWeight: 700,
           justifyContent: open ? "flex-start" : "center",
         }}
@@ -59,37 +56,20 @@ const MenuItems = ({
               ? theme.palette.secondary.main
               : theme.palette.primary.main,
             fontSize: getFontSize(level),
-            marginRight: "0px",
-            paddingLeft: "3px",
-            fontWeight: 600,
+            marginRight: open ? "10px" : "0",
           }}
         />
 
         {open && (
           <ListItemText
-            className="px-0"
+            primary={truncateText(item.menuDetail[0]?.name, 20)}
             sx={{
               "& .MuiListItemText-primary": {
-                color: IsActive(item) ? "secondary.main" : "primary.main",
-              },
-              "& .MuiListItemText-secondary": {
-                color: IsActive(item) ? "secondary.main" : "primary.main",
+                color: IsActive(item)
+                  ? theme.palette.secondary.main
+                  : theme.palette.primary.main,
               },
             }}
-            primary={
-              IsActive(item)
-                ? truncateText(item.menuDetail[0]?.name, 20)
-                : undefined
-            }
-            secondary={
-              !IsActive(item)
-                ? truncateText(item.menuDetail[0]?.name, 20)
-                : undefined
-            }
-            primaryTypographyProps={{
-              fontSize: getStyles(level).fontSize,
-            }}
-            secondaryTypographyProps={{ fontWeight: 600 }}
           />
         )}
 
@@ -100,7 +80,7 @@ const MenuItems = ({
 
       {hasChildren && (
         <Collapse in={openMenus[item.recordGuid]} timeout="auto" unmountOnExit>
-          <Box sx={{ pl: 0 }}>{renderMenu(item.children, level + 1)}</Box>
+          <Box sx={{ pl: 2 }}>{renderMenu(item.children, level + 1)}</Box>
         </Collapse>
       )}
     </div>

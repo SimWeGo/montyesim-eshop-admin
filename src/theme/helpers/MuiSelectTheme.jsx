@@ -1,25 +1,17 @@
 import { alpha } from "@mui/system";
 
 export const SelectTheme = ({ theme }) => {
-  const isDarkMode = theme.palette.mode === "dark";
-
   return {
     styleOverrides: {
       root: {
         borderRadius: "16px",
-        backgroundColor: isDarkMode
-          ? alpha(theme.palette.primary.light, 0.07)
-          : theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         "& .MuiOutlinedInput-root": {
-          backgroundColor: isDarkMode
-            ? alpha(theme.palette.primary.light, 0.07)
-            : theme.palette.background.paper,
+          backgroundColor: theme.palette.background.paper,
           borderRadius: "16px",
         },
         "& .MuiInputLabel-root": {
-          color: isDarkMode
-            ? theme.palette.secondary.light
-            : theme.palette.secondary.dark,
+          color: theme.palette.secondary.main,
           fontWeight: 500,
         },
         "& .MuiInputLabel-root.Mui-focused": {
@@ -27,27 +19,17 @@ export const SelectTheme = ({ theme }) => {
         },
       },
       select: {
-        color: isDarkMode
-          ? theme.palette.text.primary
-          : theme.palette.text.secondary,
+        color: theme.palette.text.secondary,
       },
       icon: {
-        color: isDarkMode
-          ? theme.palette.text.primary
-          : theme.palette.text.secondary,
+        color: theme.palette.text.secondary,
       },
       menu: {
-        backgroundColor: isDarkMode
-          ? theme.palette.background.default
-          : theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
       },
       paper: {
-        backgroundColor: isDarkMode
-          ? theme.palette.background.default
-          : theme.palette.background.paper,
-        color: isDarkMode
-          ? theme.palette.text.primary
-          : theme.palette.text.secondary,
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.secondary,
       },
     },
   };

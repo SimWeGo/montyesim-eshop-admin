@@ -1,5 +1,4 @@
 export const TableTheme = ({ theme }) => {
-  const isDarkMode = theme.palette.mode === "dark";
   return {
     MuiTableContainer: {
       styleOverrides: {
@@ -40,14 +39,10 @@ export const TableTheme = ({ theme }) => {
       styleOverrides: {
         root: {
           "&:nth-of-type(even)": {
-            backgroundColor: !isDarkMode
-              ? theme.palette.background.default
-              : theme.palette.primary.dark, // even rows
+            backgroundColor: theme.palette.background.default,
           },
           "&:nth-of-type(odd)": {
-            backgroundColor: !isDarkMode
-              ? "#ffffff"
-              : theme.palette.primary.main, // odd rows
+            backgroundColor: "#ffffff",
           },
         },
       },

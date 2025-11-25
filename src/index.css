@@ -121,6 +121,7 @@
   }
 
   h1 {
+    margin: 0 !important;
     font-size: 1.5rem !important;
     color: var(--color-title) !important;
     font-family: var(--font-quicksand-bold) !important;

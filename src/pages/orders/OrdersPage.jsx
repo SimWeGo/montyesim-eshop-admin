@@ -25,7 +25,7 @@ function OrdersPage() {
 
   const asyncPaginateStyles = theme?.asyncPaginateStyles || {};
 
-  const [loading, setLoading] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [totalRows, setTotalRows] = useState(0);
   const [data, setData] = useState([]);

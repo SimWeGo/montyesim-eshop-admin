@@ -1,6 +1,4 @@
 export const ButtonTheme = ({ theme }) => {
-  const isDarkMode = theme.palette.mode === "dark";
-
   return {
     styleOverrides: {
       root: {
@@ -21,12 +19,8 @@ export const ButtonTheme = ({ theme }) => {
         boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
       },
       outlinedPrimary: {
-        border: isDarkMode
-          ? `2px solid ${theme.palette.common?.white || "#FFFFFF"}`
-          : `2px solid ${theme.palette.primary.main}`,
-        color: isDarkMode
-          ? theme.palette.common?.white || "#FFFFFF"
-          : theme.palette.primary.main,
+        border: `2px solid ${theme.palette.primary.main}`,
+        color: theme.palette.primary.main,
       },
       outlinedSecondary: {
         border: `2px solid ${theme.palette.secondary.main}`,

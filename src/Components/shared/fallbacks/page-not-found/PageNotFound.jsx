@@ -1,5 +1,5 @@
 import React from "react";
-import { INDEX_ROUTE } from "../../../../core/routes/RouteVariables";
+import { INDEX_ROUTE } from "../../../../core/routes/Pages";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 

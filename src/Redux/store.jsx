@@ -8,11 +8,13 @@ import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import AuthSlice from "./reducers/AuthReducer";
 import ThemeReducer from "./reducers/ThemeReducer";
+import SidebarReducer from "./reducers/SidebarReducer";
 import hardSet from "redux-persist/es/stateReconciler/hardSet";
 import { thunk } from "redux-thunk";
 
 const rootReducer = combineReducers({
   authentication: AuthSlice,
+  sidebar: SidebarReducer,
   theme: ThemeReducer,
 });
 
@@ -20,7 +22,7 @@ const persistConfig = {
   key: "root",
   storage,
   stateReconciler: hardSet,
-  whitelist: ["authentication", "theme"],
+  whitelist: ["authentication", "sidebar", "theme"],
   debug: true,
 };
 

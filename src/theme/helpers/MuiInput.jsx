@@ -1,22 +1,15 @@
 import { alpha } from "@mui/system";
 
 export const InputTheme = ({ theme }) => {
-  const isDarkMode = theme.palette.mode === "dark";
-
   return {
     styleOverrides: {
       root: {
         borderRadius: "8px",
         "& .MuiOutlinedInput-root": {
-          backgroundColor: isDarkMode
-            ? alpha(theme.palette.primary.light, 0.07)
-            : theme.palette.background.paper,
+          backgroundColor: theme.palette.background.paper,
           borderRadius: "16px",
         },
         "& .MuiInputLabel-root": {
-          // color: isDarkMode
-          //   ?  theme.palette.secondary.light
-          //   : theme.palette.secondary.dark,
           fontWeight: 500,
         },
         "& .MuiInputLabel-root.Mui-focused": {
@@ -24,9 +17,7 @@ export const InputTheme = ({ theme }) => {
         },
       },
       input: {
-        color: isDarkMode
-          ? theme.palette.text.primary
-          : theme.palette.text.secondary,
+        color: theme.palette.text.secondary,
         "&:-webkit-autofill": {
           WebkitBoxShadow: "0 0 0px 1000px transparent inset !important",
           backgroundColor: "transparent !important",
@@ -34,12 +25,8 @@ export const InputTheme = ({ theme }) => {
         },
       },
       paper: {
-        backgroundColor: isDarkMode
-          ? theme.palette.background.default
-          : theme.palette.background.paper,
-        color: isDarkMode
-          ? theme.palette.text.primary
-          : theme.palette.text.secondary,
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.secondary,
       },
     },
   };

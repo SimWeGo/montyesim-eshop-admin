@@ -15,19 +15,11 @@ export const addTags = async (payload) => {
 
     return res;
   } catch (error) {
-    console.error("error in addTags:", error);
     throw error;
   }
 };
 
 export const upsertTag = async (payload) => {
-  console.log(
-    payload,
-    "ddddddddd",
-    payload?.tagsWithUploadedIcons?.map((el) => {
-      return { ...el, tag_group_id: parseInt(payload?.group_id) };
-    })
-  );
   try {
     const res = await api(() => {
       let query = supabase.from("tag").upsert(
@@ -40,7 +32,6 @@ export const upsertTag = async (payload) => {
 
     return res;
   } catch (error) {
-    console.error("error in upsertTag:", error);
     throw error;
   }
 };
@@ -53,14 +44,12 @@ export const deleteTags = async (payload) => {
       return query;
     });
 
-    console.log(res, "deleted tag res");
     if (!res?.error) {
       cleanupTagUploadedIcons(payload);
     }
 
     return res;
   } catch (error) {
-    console.error("error in deleteTags:", error);
     throw error;
   }
 };
@@ -78,7 +67,6 @@ export const getTagsByTagGroup = async (tagGroupId) => {
 
     return res;
   } catch (err) {
-    console.error("Error fetching tags by tag group:", err);
     throw err;
   }
 };

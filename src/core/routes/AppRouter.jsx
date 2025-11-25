@@ -4,6 +4,7 @@ import { privateRoutes, publicRoutes } from "./allRoutes";
 import { WithSuperAdmins } from "../hoc/WithSuperAdmins";
 
 const AppRouter = () => {
+  console.log("mounted");
   return (
     <Routes>
       {privateRoutes?.map((route) =>
