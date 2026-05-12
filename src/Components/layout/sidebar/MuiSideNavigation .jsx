@@ -65,8 +65,7 @@ const MuiSideNavigation = () => {
         );
       }
 
-      return item?.superAdminAccess &&
-        !user?.user_info?.email?.toLowerCase()?.includes("superadmin") ? (
+      return item?.superAdminAccess && !user?.user_info?.is_admin ? (
         ""
       ) : (
         <MenuItems

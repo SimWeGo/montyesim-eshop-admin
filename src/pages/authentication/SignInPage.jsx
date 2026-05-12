@@ -35,33 +35,41 @@ export default function SignInPage() {
 
   const handleSubmitForm = async (payload) => {
     setLoading(true);
-
-    await supabase.auth
-      .signInWithPassword({
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: payload.email?.trim(),
         password: payload.password?.trim(),
-      })
-      .then((res) => {
-        if (res?.error) {
-          toast.error(res?.error?.message || "Failed to Sign in");
-          console.error("Error fetching data:", res?.error?.code);
-        } else {
-          dispatch(
-            SignIn({
-              access_token: res.data.session.access_token,
-              refresh_token: res?.data?.session?.refresh_token,
-              user_info: res.data.user,
-            })
-          );
-          navigate("/users");
-        }
-      })
-      .catch((e) => {
-        toast.error(e?.message || "Failed to Sign in");
-      })
-      .finally(() => {
-        setLoading(false);
       });
+      if (error) {
+        toast.error(error.message || "Failed to Sign in");
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("users_copy")
+        .select("is_admin")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profileError || !profile?.is_admin) {
+        await supabase.auth.signOut();
+        toast.error("Access denied: account is not an admin");
+        return;
+      }
+
+      dispatch(
+        SignIn({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+          user_info: { ...data.user, is_admin: true },
+        })
+      );
+      navigate("/users");
+    } catch (e) {
+      toast.error(e?.message || "Failed to Sign in");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
