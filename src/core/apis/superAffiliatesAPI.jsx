@@ -57,6 +57,20 @@ export const updateNetworkRate = (superId, payload) =>
     rest.patch(`/admin/super-affiliates/${superId}/network-rate`, payload)
   );
 
+// GET /admin/super-affiliates/payouts (S5, monty-api 075f5b2) — historique
+// paginé SERVEUR des payouts SimWeGo→super. admin_only (lecture).
+// Réponse : List[SuperPayoutDTO] {id, super_affiliate_id, super_name (join),
+// total_amount_cents, sub_commissions_amount_cents,
+// super_margin_amount_cents, entry_count, currency, status
+// 'paid'|'cancelled', payment_method, payment_reference, paid_at, notes,
+// created_at} — totalCount = nb total de lignes (→ res.count).
+export const getSuperPayouts = ({ superId = null, page = 0, pageSize = 10 }) =>
+  restApi((rest) =>
+    rest.get("/admin/super-affiliates/payouts", {
+      params: { super_id: superId || undefined, page, page_size: pageSize },
+    })
+  );
+
 // ================================================== Payouts (admin_payouts.py)
 // ⚠️ Contrats RÉELS Sprint 3 (divergent de l'annexe §A6) — router
 // /admin/payouts/*, TOUT super_admin_only, montants en CENTIMES.

@@ -21,6 +21,7 @@ import {
   createSuperPayout,
   getPendingNetworks,
   getSuperPendingAmount,
+  getSuperPayouts,
   undoSuperPayout,
 } from "../../core/apis/superAffiliatesAPI";
 import { useIsSuperAdmin } from "../../core/hoc/WithSuperAdminOnly";
@@ -228,9 +229,10 @@ const SuperAffiliatePayouts = () => {
   const [pending, setPending] = useState([]);
   const [generate, setGenerate] = useState({ open: false, data: null });
 
-  // ---- Payouts générés dans CETTE session (pas d'endpoint d'historique
-  // serveur — l'undo cible un payout qu'on vient de créer)
-  const [sessionPayouts, setSessionPayouts] = useState([]);
+  // ---- Historique SERVEUR des payouts (GET /admin/super-affiliates/payouts,
+  // monty-api S5) — page 0, 25 lignes, réseaux confondus.
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [history, setHistory] = useState([]);
   const [undo, setUndo] = useState({
     open: false,
     data: null,
@@ -251,11 +253,26 @@ const SuperAffiliatePayouts = () => {
       .finally(() => setPendingLoading(false));
   };
 
+  const getHistory = () => {
+    setHistoryLoading(true);
+    getSuperPayouts({ page: 0, pageSize: 25 })
+      .then((res) => {
+        if (res?.error) {
+          toast.error(res?.error);
+          setHistory([]);
+        } else {
+          setHistory(res?.data || []);
+        }
+      })
+      .finally(() => setHistoryLoading(false));
+  };
+
   useEffect(() => {
     // TOUT /admin/payouts/* est super_admin_only : ne rien fetcher pour un
     // admin simple (la page resterait sinon une cascade de toasts 403)
     if (isSuperAdmin) {
       getPending();
+      getHistory();
     }
   }, [isSuperAdmin]);
 
@@ -273,16 +290,10 @@ const SuperAffiliatePayouts = () => {
           toast.success(
             `Payout cancelled — ${res?.data?.restored_entries} ledger entries released back to unpaid`
           );
-          // Trace locale : le payout reste listé, marqué cancelled
-          setSessionPayouts((prev) =>
-            prev.map((p) =>
-              p?.id === undo?.data?.id
-                ? { ...p, status: "cancelled", undone_at: new Date().toISOString() }
-                : p
-            )
-          );
           setUndo({ open: false, data: null, submitting: false });
+          // Source de vérité = serveur : refetch (la ligne passe cancelled)
           getPending();
+          getHistory();
         }
       });
   };
@@ -402,28 +413,30 @@ const SuperAffiliatePayouts = () => {
         ))}
       </TableComponent>
 
-      {/* ================= Payouts of this session ================= */}
+      {/* ================= Payout history (server) ================= */}
       <div className="flex items-center mt-6">
         <div className="w-[20px] h-px bg-gray-300" />
-        <h6 className="px-2">Payouts generated this session</h6>
+        <h6 className="px-2">Payout history</h6>
         <div className="w-[20px] h-px bg-gray-300" />
       </div>
       <p className={"text-sm px-2"}>
-        The API does not expose a payout history endpoint yet — payouts listed
-        below were generated in this session. Undo is available while the row
-        is still visible (a super admin can also undo via the API with the
-        payout id).
+        Last 25 payouts (all networks). Cancelled payouts stay listed for
+        audit. Undo releases the claimed ledger entries back to unpaid.
       </p>
 
       <TableComponent
-        loading={false}
-        tableData={sessionPayouts}
+        loading={historyLoading}
+        tableData={history}
         tableHeaders={sessionHeaders}
         actions={false}
-        noDataFound={"No payout generated in this session"}
+        noDataFound={"No payout yet"}
       >
-        {sessionPayouts?.map((el) => (
-          <RowComponent key={el?.id} actions={false}>
+        {history?.map((el) => (
+          <RowComponent
+            key={el?.id}
+            actions={false}
+            className={el?.status === "cancelled" ? "opacity-50" : undefined}
+          >
             <TableCell className={"whitespace-nowrap"}>
               {el?.paid_at || el?.created_at
                 ? dayjs(el?.paid_at || el?.created_at).format(
@@ -483,10 +496,8 @@ const SuperAffiliatePayouts = () => {
           onClose={() => setGenerate({ open: false, data: null })}
           onDone={(payout) => {
             setGenerate({ open: false, data: null });
-            if (payout) {
-              setSessionPayouts((prev) => [payout, ...prev]);
-            }
             getPending();
+            getHistory();
           }}
         />
       )}
