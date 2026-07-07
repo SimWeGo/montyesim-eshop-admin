@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { MenuRoutes } from "../../../core/routes/Pages";
+import { ADMIN_ROLES } from "../../../core/helpers/sessionRefresh";
 import { toggleSidebar } from "../../../Redux/reducers/SidebarReducer";
 import IconImage from "../../shared/icon-image/IconImage";
 import MenuItems from "./MenuItems";
@@ -65,7 +66,10 @@ const MuiSideNavigation = () => {
         );
       }
 
-      return item?.superAdminAccess && !user?.user_info?.is_admin ? (
+      return (item?.superAdminOnly &&
+        user?.user_info?.role !== "super_admin") ||
+        (item?.superAdminAccess &&
+          !ADMIN_ROLES.includes(user?.user_info?.role)) ? (
         ""
       ) : (
         <MenuItems

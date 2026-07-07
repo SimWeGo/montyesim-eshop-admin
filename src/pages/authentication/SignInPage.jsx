@@ -13,6 +13,7 @@ import {
 } from "../../Components/form-component/FormComponent";
 import supabase from "../../core/apis/supabase";
 import { SignIn } from "../../Redux/reducers/AuthReducer";
+import { ADMIN_ROLES } from "../../core/helpers/sessionRefresh";
 
 const validationSchema = Yup.object({
   email: Yup.string().required("Email is required"),
@@ -45,13 +46,17 @@ export default function SignInPage() {
         return;
       }
 
+      // Colonne users_copy.role (D5) — is_admin est abandonné : c'était
+      // l'une des 2 sources du split-brain de rôles (admin_auth.py lit
+      // déjà role côté back).
       const { data: profile, error: profileError } = await supabase
         .from("users_copy")
-        .select("is_admin")
+        .select("role")
         .eq("id", data.user.id)
         .single();
 
-      if (profileError || !profile?.is_admin) {
+      const role = profile?.role;
+      if (profileError || !ADMIN_ROLES.includes(role)) {
         await supabase.auth.signOut();
         toast.error("Access denied: account is not an admin");
         return;
@@ -61,7 +66,9 @@ export default function SignInPage() {
         SignIn({
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token,
-          user_info: { ...data.user, is_admin: true },
+          // user_info COMPLET : le rôle voyage dans Redux (persisté) et
+          // est re-fetché à chaque refresh de session (B2)
+          user_info: { ...data.user, role },
         })
       );
       navigate("/users");

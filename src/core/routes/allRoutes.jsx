@@ -23,6 +23,10 @@ import EditSettings from "../../pages/settings/EditSettings";
 import Referrals from "../../pages/referral/Referrals";
 import SettingsLogs from "../../pages/settings/SettingsLogs";
 import SettingsLogsDetail from "../../pages/settings/SettingsLogsDetail";
+import AffiliatesList from "../../pages/affiliates/AffiliatesList";
+import HandleAffiliate from "../../pages/affiliates/HandleAffiliate";
+import SuperAffiliatesList from "../../pages/super-affiliates/SuperAffiliatesList";
+import SuperAffiliatePayouts from "../../pages/super-affiliates/SuperAffiliatePayouts";
 
 export const privateRoutes = [
   {
@@ -189,6 +193,43 @@ export const privateRoutes = [
         key: "/referrals",
         name: "Referrals",
         regex: "^/referrals/?$",
+      },
+      {
+        path: "/affiliates",
+        element: <AffiliatesList />,
+        key: "/affiliates",
+        name: "Affiliates",
+        regex: "^/affiliates/?$",
+      },
+      {
+        path: "/affiliates/add",
+        element: <HandleAffiliate />,
+        key: "/affiliates/add",
+        name: "Add Affiliate",
+        regex: "^/affiliates/add?$",
+      },
+      {
+        path: "/affiliates/:id",
+        element: <HandleAffiliate />,
+        key: "/affiliates/:id",
+        name: "Edit Affiliate",
+        regex: "^/affiliates/([0-9a-fA-F-]+)?$",
+      },
+      {
+        path: "/super-affiliates",
+        element: <SuperAffiliatesList />,
+        key: "/super-affiliates",
+        name: "Super Affiliates",
+        regex: "^/super-affiliates/?$",
+        superAdminAccess: true,
+      },
+      {
+        path: "/super-affiliate-payouts",
+        element: <SuperAffiliatePayouts />,
+        key: "/super-affiliate-payouts",
+        name: "Super Affiliate Payouts",
+        regex: "^/super-affiliate-payouts/?$",
+        superAdminAccess: true,
       },
       {
         path: "*",
