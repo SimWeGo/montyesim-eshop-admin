@@ -18,7 +18,9 @@ import MuiModal from "../../Components/Modals/MuiModal";
 import RowComponent from "../../Components/shared/table-component/RowComponent";
 import TableComponent from "../../Components/shared/table-component/TableComponent";
 import {
+  createIndependentPayout,
   createSuperPayout,
+  getIndependentsPending,
   getPendingNetworks,
   getSuperPendingAmount,
   getSuperPayouts,
@@ -239,6 +241,58 @@ const SuperAffiliatePayouts = () => {
     submitting: false,
   });
 
+  // ---- Affiliés DIRECTS (sans réseau) : « marquer payé » (2026-07-22)
+  const [indepLoading, setIndepLoading] = useState(false);
+  const [independents, setIndependents] = useState([]);
+  const [indepConfirm, setIndepConfirm] = useState({
+    open: false,
+    data: null,
+    submitting: false,
+  });
+
+  const getIndependents = () => {
+    setIndepLoading(true);
+    getIndependentsPending()
+      .then((res) => {
+        if (res?.error) {
+          toast.error(res?.error);
+          setIndependents([]);
+        } else {
+          setIndependents(res?.data || []);
+        }
+      })
+      .finally(() => setIndepLoading(false));
+  };
+
+  const handleIndependentPayout = () => {
+    setIndepConfirm((prev) => ({ ...prev, submitting: true }));
+    createIndependentPayout(indepConfirm?.data?.affiliate_id, {
+      payment_method: "bank_transfer",
+    }).then((res) => {
+      if (res?.error) {
+        // 422 AFFILIATE_NOT_INDEPENDENT / 409 PAYOUT_MIXED_CURRENCIES
+        toast.error(
+          res?.errorCode ? `${res.error} [${res.errorCode}]` : res?.error
+        );
+        setIndepConfirm((prev) => ({ ...prev, submitting: false }));
+      } else if (res?.status === 204 || !res?.data) {
+        toast.info("Nothing left to pay for this affiliate");
+        setIndepConfirm({ open: false, data: null, submitting: false });
+        getIndependents();
+      } else {
+        toast.success(
+          `Payout recorded — ${formatCents(
+            res?.data?.total_amount_cents,
+            res?.data?.currency
+          )} to ${indepConfirm?.data?.name}`
+        );
+        setIndepConfirm({ open: false, data: null, submitting: false });
+        getIndependents();
+        getHistory();
+      }
+    });
+  };
+
   const getPending = () => {
     setPendingLoading(true);
     getPendingNetworks()
@@ -272,6 +326,7 @@ const SuperAffiliatePayouts = () => {
     // admin simple (la page resterait sinon une cascade de toasts 403)
     if (isSuperAdmin) {
       getPending();
+      getIndependents();
       getHistory();
     }
   }, [isSuperAdmin]);
@@ -302,6 +357,16 @@ const SuperAffiliatePayouts = () => {
     { name: "Network" },
     { name: "N" },
     { name: "Subs" },
+    { name: "Entries" },
+    { name: "Pending amount" },
+    { name: "Oldest entry" },
+    { name: "Status" },
+    { name: "" },
+  ];
+
+  const indepHeaders = [
+    { name: "Affiliate" },
+    { name: "Rate" },
     { name: "Entries" },
     { name: "Pending amount" },
     { name: "Oldest entry" },
@@ -412,6 +477,106 @@ const SuperAffiliatePayouts = () => {
           </RowComponent>
         ))}
       </TableComponent>
+
+      {/* ============ Direct affiliates (no network) — mark as paid ============ */}
+      <div className="flex items-center mt-6">
+        <div className="w-[20px] h-px bg-gray-300" />
+        <h6 className="px-2">Direct affiliates — pending commissions</h6>
+        <div className="w-[20px] h-px bg-gray-300" />
+      </div>
+      <p className={"text-sm px-2"}>
+        Network-free affiliates (paid directly by SimWeGo). Make your bank
+        transfer as usual, then mark the affiliate as paid: the pending amount
+        drops to zero and the payout joins the history below (undo available).
+      </p>
+
+      <TableComponent
+        loading={indepLoading}
+        tableData={independents}
+        tableHeaders={indepHeaders}
+        actions={false}
+        noDataFound={"No direct affiliate with unpaid commissions"}
+      >
+        {independents?.map((el) => (
+          <RowComponent key={el?.affiliate_id} actions={false}>
+            <TableCell className={"max-w-[220px] truncate"}>
+              {el?.name || "N/A"}
+            </TableCell>
+            <TableCell className={"whitespace-nowrap"}>
+              {formatRate(el?.commission_rate)}
+            </TableCell>
+            <TableCell>{el?.entry_count ?? 0}</TableCell>
+            <TableCell className={"whitespace-nowrap font-bold"}>
+              {formatCents(el?.pending_amount_cents, el?.currency)}
+              {Number(el?.pending_amount_cents) < 0 && (
+                <Chip size="small" color="error" label="Negative" sx={{ ml: 1 }} />
+              )}
+              {Number(el?.currency_count) > 1 && (
+                <Tooltip
+                  title={
+                    "Entries mix several currencies — payout will fail (manual review)"
+                  }
+                  placement={"top"}
+                >
+                  <Chip size="small" color="warning" label="Mixed currencies" sx={{ ml: 1 }} />
+                </Tooltip>
+              )}
+            </TableCell>
+            <TableCell className={"whitespace-nowrap"}>
+              {el?.oldest_entry_at
+                ? dayjs(el?.oldest_entry_at).format("DD-MM-YYYY")
+                : "N/A"}
+            </TableCell>
+            <TableCell>
+              <Chip
+                size="small"
+                color={el?.is_active ? "success" : "default"}
+                label={el?.is_active ? "Active" : "Inactive"}
+              />
+            </TableCell>
+            <TableCell align={"right"}>
+              <Button
+                variant={"contained"}
+                color="primary"
+                size={"small"}
+                onClick={() =>
+                  setIndepConfirm({ open: true, data: el, submitting: false })
+                }
+              >
+                Mark as paid
+              </Button>
+            </TableCell>
+          </RowComponent>
+        ))}
+      </TableComponent>
+
+      {/* Confirmation 2 étapes — même modèle que les réseaux */}
+      {indepConfirm?.open && (
+        <ConfirmActionModal
+          open={true}
+          onClose={() =>
+            setIndepConfirm({ open: false, data: null, submitting: false })
+          }
+          onConfirm={handleIndependentPayout}
+          submitting={indepConfirm?.submitting}
+          title={"Mark affiliate as paid"}
+          confirmButtonName={"Confirm payout"}
+          warning={
+            <Alert severity="info">
+              Records that you paid{" "}
+              <span className={"font-bold"}>
+                {formatCents(
+                  indepConfirm?.data?.pending_amount_cents,
+                  indepConfirm?.data?.currency
+                )}
+              </span>{" "}
+              to <span className={"font-bold"}>{indepConfirm?.data?.name}</span>
+              . The pending amount drops to zero. This does not move money —
+              make the bank transfer first. Undo is available from the history.
+            </Alert>
+          }
+        />
+      )}
 
       {/* ================= Payout history (server) ================= */}
       <div className="flex items-center mt-6">
