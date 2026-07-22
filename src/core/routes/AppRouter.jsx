@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { privateRoutes, publicRoutes } from "./allRoutes";
 import { WithSuperAdmins } from "../hoc/WithSuperAdmins";
+import { WithSuperAdminOnly } from "../hoc/WithSuperAdminOnly";
 
 const AppRouter = () => {
   console.log("mounted");
@@ -16,7 +17,9 @@ const AppRouter = () => {
                 key={child.path}
                 path={child.path}
                 element={
-                  child?.superAdminAccess ? (
+                  child?.superAdminOnly ? (
+                    <WithSuperAdminOnly>{child.element}</WithSuperAdminOnly>
+                  ) : child?.superAdminAccess ? (
                     <WithSuperAdmins>{child.element}</WithSuperAdmins>
                   ) : (
                     child.element
@@ -30,7 +33,9 @@ const AppRouter = () => {
             key={route.path}
             index={route?.index}
             element={
-              route?.superAdminAccess ? (
+              route?.superAdminOnly ? (
+                <WithSuperAdminOnly>{route?.element}</WithSuperAdminOnly>
+              ) : route?.superAdminAccess ? (
                 <WithSuperAdmins>{route?.element}</WithSuperAdmins>
               ) : (
                 route?.element
