@@ -71,6 +71,19 @@ export const getSuperPayouts = ({ superId = null, page = 0, pageSize = 10 }) =>
     })
   );
 
+// ---- Affiliés DIRECTS (sans réseau) — « marquer payé » (2026-07-22) ----
+// GET /admin/payouts/independents/pending → List[IndependentWithPendingDTO]
+// { affiliate_id, name, is_active, commission_rate, pending_amount_cents,
+//   entry_count, currency, currency_count, oldest_entry_at }
+export const getIndependentsPending = () =>
+  restApi((rest) => rest.get("/admin/payouts/independents/pending"));
+
+// POST /admin/payouts/independents/{id} → 200 SuperPayoutDTO | 204 rien à payer
+export const createIndependentPayout = (affiliateId, payload = {}) =>
+  restApi((rest) =>
+    rest.post(`/admin/payouts/independents/${affiliateId}`, payload)
+  );
+
 // ================================================== Payouts (admin_payouts.py)
 // ⚠️ Contrats RÉELS Sprint 3 (divergent de l'annexe §A6) — router
 // /admin/payouts/*, TOUT super_admin_only, montants en CENTIMES.
