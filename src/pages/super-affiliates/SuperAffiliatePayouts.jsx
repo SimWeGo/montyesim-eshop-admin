@@ -20,6 +20,7 @@ import TableComponent from "../../Components/shared/table-component/TableCompone
 import {
   createIndependentPayout,
   createSuperPayout,
+  getAllAffiliatesRest,
   getIndependentsPending,
   getPendingNetworks,
   getSuperPendingAmount,
@@ -241,6 +242,12 @@ const SuperAffiliatePayouts = () => {
     submitting: false,
   });
 
+  // ---- Vue globale « tous les partenaires » (demande Julien 27/07) :
+  // fusion CLIENT de la liste complète (stats à vie) avec les deux listes
+  // de dus — aucun endpoint dédié.
+  const [allLoading, setAllLoading] = useState(false);
+  const [allAffiliates, setAllAffiliates] = useState([]);
+
   // ---- Affiliés DIRECTS (sans réseau) : « marquer payé » (2026-07-22)
   const [indepLoading, setIndepLoading] = useState(false);
   const [independents, setIndependents] = useState([]);
@@ -321,15 +328,70 @@ const SuperAffiliatePayouts = () => {
       .finally(() => setHistoryLoading(false));
   };
 
+  const getAllPartners = () => {
+    setAllLoading(true);
+    getAllAffiliatesRest()
+      .then((res) => {
+        if (res?.error) {
+          toast.error(res?.error);
+          setAllAffiliates([]);
+        } else {
+          setAllAffiliates(res?.data || []);
+        }
+      })
+      .finally(() => setAllLoading(false));
+  };
+
   useEffect(() => {
     // TOUT /admin/payouts/* est super_admin_only : ne rien fetcher pour un
     // admin simple (la page resterait sinon une cascade de toasts 403)
     if (isSuperAdmin) {
+      getAllPartners();
       getPending();
       getIndependents();
       getHistory();
     }
   }, [isSuperAdmin]);
+
+  // Fusion vue globale : réseaux + affiliés directs (les agences réseau sont
+  // payées par LEUR réseau — seul un éventuel reliquat pré-rattachement les
+  // fait apparaître, badgé). Dû réseau ↔ pending RPC ; dû direct ↔ liste
+  // indépendants. Tri : dû décroissant puis nom.
+  const dueByNetwork = Object.fromEntries(
+    (pending || []).map((p) => [p.super_affiliate_id, p])
+  );
+  const dueByIndependent = Object.fromEntries(
+    (independents || []).map((i) => [i.affiliate_id, i])
+  );
+  const partnersOverview = (allAffiliates || [])
+    .filter(
+      (a) =>
+        a?.is_super_affiliate ||
+        !a?.parent_affiliate_id ||
+        dueByIndependent[a?.id] // agence réseau à reliquat pré-rattachement
+    )
+    .map((a) => {
+      const due = a?.is_super_affiliate
+        ? dueByNetwork[a?.id]
+        : dueByIndependent[a?.id];
+      return {
+        ...a,
+        due_cents: Number(due?.pending_amount_cents ?? 0),
+        due_currency: due?.currency,
+        partner_type: a?.is_super_affiliate
+          ? "network"
+          : a?.parent_affiliate_id
+            ? "network_agency"
+            : "direct",
+      };
+    })
+    .sort(
+      (x, y) => y.due_cents - x.due_cents || x.name?.localeCompare(y?.name)
+    );
+  const totalDueCents = partnersOverview.reduce(
+    (sum, p) => sum + p.due_cents,
+    0
+  );
 
   const handleUndo = () => {
     setUndo((prev) => ({ ...prev, submitting: true }));
@@ -352,6 +414,15 @@ const SuperAffiliatePayouts = () => {
         }
       });
   };
+
+  const overviewHeaders = [
+    { name: "Partner" },
+    { name: "Type" },
+    { name: "Orders" },
+    { name: "Total commission" },
+    { name: "Due now" },
+    { name: "Status" },
+  ];
 
   const pendingHeaders = [
     { name: "Network" },
@@ -401,8 +472,75 @@ const SuperAffiliatePayouts = () => {
 
   return (
     <Card className="page-card">
-      {/* ================= Pending by network ================= */}
+      {/* ================= All partners — overview ================= */}
       <div className="flex items-center">
+        <div className="w-[20px] h-px bg-gray-300" />
+        <h6 className="px-2">All partners — overview</h6>
+        <div className="w-[20px] h-px bg-gray-300" />
+      </div>
+      <p className={"text-sm px-2"}>
+        Every partner SimWeGo pays directly (networks and direct affiliates),
+        including those with nothing due. Network agencies are paid by their
+        network and only appear here for pre-attachment leftovers. Total due
+        now: <b>{formatCents(totalDueCents, "EUR")}</b>
+      </p>
+
+      <TableComponent
+        loading={allLoading || pendingLoading || indepLoading}
+        tableData={partnersOverview}
+        tableHeaders={overviewHeaders}
+        actions={false}
+        noDataFound={"No partner found"}
+      >
+        {partnersOverview?.map((el) => (
+          <RowComponent key={el?.id} actions={false}>
+            <TableCell className={"max-w-[220px] truncate"}>
+              {el?.name || "N/A"}
+            </TableCell>
+            <TableCell>
+              {el?.partner_type === "network" ? (
+                <Chip size="small" color="primary" label="Network" />
+              ) : el?.partner_type === "network_agency" ? (
+                <Tooltip
+                  title={
+                    "Agency now attached to a network — amount due was earned BEFORE attachment"
+                  }
+                  placement={"top"}
+                >
+                  <Chip size="small" color="warning" label="Network agency" />
+                </Tooltip>
+              ) : (
+                <Chip size="small" variant="outlined" label="Direct" />
+              )}
+            </TableCell>
+            <TableCell>{el?.total_orders ?? 0}</TableCell>
+            <TableCell className={"whitespace-nowrap"}>
+              {/* total_commission : euros (stats à vie, legacy) */}
+              {el?.partner_type === "network"
+                ? "—"
+                : formatCents(
+                    Math.round(Number(el?.total_commission || 0) * 100),
+                    "EUR"
+                  )}
+            </TableCell>
+            <TableCell className={"whitespace-nowrap font-bold"}>
+              {el?.due_cents
+                ? formatCents(el?.due_cents, el?.due_currency)
+                : formatCents(0, "EUR")}
+            </TableCell>
+            <TableCell>
+              <Chip
+                size="small"
+                color={el?.is_active ? "success" : "default"}
+                label={el?.is_active ? "Active" : "Inactive"}
+              />
+            </TableCell>
+          </RowComponent>
+        ))}
+      </TableComponent>
+
+      {/* ================= Pending by network ================= */}
+      <div className="flex items-center mt-6">
         <div className="w-[20px] h-px bg-gray-300" />
         <h6 className="px-2">Pending commissions by network</h6>
         <div className="w-[20px] h-px bg-gray-300" />
@@ -492,15 +630,38 @@ const SuperAffiliatePayouts = () => {
 
       <TableComponent
         loading={indepLoading}
-        tableData={independents}
+        // Solde strictement nul = rien à payer (ex. vente remboursée :
+        // earning + reversal s'annulent) — bruit masqué de la liste d'action
+        tableData={independents?.filter(
+          (el) => Number(el?.pending_amount_cents) !== 0
+        )}
         tableHeaders={indepHeaders}
         actions={false}
         noDataFound={"No direct affiliate with unpaid commissions"}
       >
-        {independents?.map((el) => (
+        {independents
+          ?.filter((el) => Number(el?.pending_amount_cents) !== 0)
+          ?.map((el) => (
           <RowComponent key={el?.affiliate_id} actions={false}>
             <TableCell className={"max-w-[220px] truncate"}>
               {el?.name || "N/A"}
+              {/* Agence depuis rattachée à un réseau : ce dû est son reliquat
+                  d'AVANT rattachement (RPC 2026-07-27) */}
+              {el?.parent_affiliate_id && (
+                <Tooltip
+                  title={
+                    "Agency now attached to a network — this amount was earned BEFORE attachment and is still paid by SimWeGo"
+                  }
+                  placement={"top"}
+                >
+                  <Chip
+                    size="small"
+                    color="warning"
+                    label="Pre-attachment"
+                    sx={{ ml: 1 }}
+                  />
+                </Tooltip>
+              )}
             </TableCell>
             <TableCell className={"whitespace-nowrap"}>
               {formatRate(el?.commission_rate)}

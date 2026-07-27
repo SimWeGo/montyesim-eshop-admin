@@ -35,6 +35,8 @@ const buildSchema = (isEdit) =>
     name: yup.string().label("Name").min(2).max(60).required().nullable(),
     email: yup.string().label("Email").email().nullable(),
     company_name: yup.string().label("Company").max(100).nullable(),
+    // Affiché sur le bandeau partenaire de la boutique (AffiliateBanner)
+    logo_url: yup.string().label("Logo URL").url().max(500).nullable(),
     contact_phone: yup.string().label("Phone").max(30).nullable(),
     commission_rate: yup
       .number()
@@ -92,6 +94,7 @@ const HandleAffiliate = () => {
       email: "",
       company_name: "",
       contact_phone: "",
+      logo_url: "",
       commission_rate: 10,
       promo_code: "",
       promo_amount: 5,
@@ -116,6 +119,7 @@ const HandleAffiliate = () => {
               email: res?.data?.email || "",
               company_name: res?.data?.company_name || "",
               contact_phone: res?.data?.contact_phone || "",
+              logo_url: res?.data?.logo_url || "",
               commission_rate: res?.data?.commission_rate ?? 0,
               promo_code: "",
               promo_amount: null,
@@ -181,6 +185,7 @@ const HandleAffiliate = () => {
       name: payload?.name?.trim(),
       email: payload?.email || null,
       company_name: payload?.company_name || null,
+      logo_url: payload?.logo_url || null,
       contact_phone: payload?.contact_phone || null,
       commission_rate: Number(payload?.commission_rate),
       notes: payload?.notes || null,
@@ -300,6 +305,21 @@ const HandleAffiliate = () => {
                 />
               )}
               name="contact_phone"
+              control={control}
+            />
+          </div>
+          <div className={"flex-1 min-w-[200px]"}>
+            <label>Logo URL </label>
+            <Controller
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <FormInput
+                  placeholder={"https://… (shown on the shop partner banner)"}
+                  value={value}
+                  onChange={onChange}
+                  helperText={error?.message}
+                />
+              )}
+              name="logo_url"
               control={control}
             />
           </div>
