@@ -34,6 +34,14 @@ export const AsyncPaginateTheme = ({ theme }) => {
       zIndex: 9999,
       position: "absolute",
     }),
+    // menuPortalTarget=document.body sort le menu du DOM du composant : sans
+    // z-index explicite le portail retombe à 1 (défaut react-select) et passe
+    // SOUS les modales MUI (Modal = 1300) → menu invisible dans un dialog
+    // (bug « liste vide » du rattachement d'affilié, 2026-07-28).
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 13000,
+    }),
     option: (base, { isFocused, isSelected }) => {
       let backgroundColor = "transparent";
 
