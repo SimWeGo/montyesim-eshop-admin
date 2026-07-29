@@ -50,7 +50,13 @@ const buildSchema = (isEdit) =>
       ? yup.string().nullable()
       : yup.string().label("Promo code").min(2).max(30).required().nullable(),
     promo_amount: isEdit
-      ? yup.number().transform(emptyToNull).nullable()
+      ? yup
+          .number()
+          .label("Promo discount")
+          .transform(emptyToNull)
+          .min(0)
+          .max(100)
+          .nullable()
       : yup
           .number()
           .label("Promo discount")
@@ -121,8 +127,9 @@ const HandleAffiliate = () => {
               contact_phone: res?.data?.contact_phone || "",
               logo_url: res?.data?.logo_url || "",
               commission_rate: res?.data?.commission_rate ?? 0,
-              promo_code: "",
-              promo_amount: null,
+              promo_code: res?.data?.promo_code || "",
+              // Prefill du % promo (P) — édition réservée aux directs (#9)
+              promo_amount: res?.data?.promo_amount ?? null,
               parent_super: null,
               notes: res?.data?.notes || "",
               is_active: res?.data?.is_active ?? true,
@@ -215,10 +222,20 @@ const HandleAffiliate = () => {
         })
         .finally(() => setIsSubmitting(false));
     } else {
-      updateAffiliateRest(id, { ...base, is_active: payload?.is_active })
+      // % promo (P) éditable seulement pour un affilié DIRECT ; le back
+      // refuse de toute façon pour une agence réseau (USE_NETWORK_RATE_FLOW).
+      const isDirect =
+        !data?.parent_affiliate_id && !data?.is_super_affiliate;
+      const editPayload = { ...base, is_active: payload?.is_active };
+      if (isDirect && payload?.promo_amount != null && payload?.promo_amount !== "") {
+        editPayload.promo_amount = Number(payload?.promo_amount);
+      }
+      updateAffiliateRest(id, editPayload)
         .then((res) => {
           if (res?.error) {
-            toast.error(res?.error);
+            toast.error(
+              res?.errorCode ? `${res.error} [${res.errorCode}]` : res?.error
+            );
           } else {
             toast.success("Affiliate edited successfully");
             navigate(-1);
@@ -316,7 +333,10 @@ const HandleAffiliate = () => {
                   placeholder={"https://… (shown on the shop partner banner)"}
                   value={value}
                   onChange={onChange}
-                  helperText={error?.message}
+                  helperText={
+                    error?.message ||
+                    "Recommended image size: 1200 × 600 px (shown on the shop partner banner)"
+                  }
                 />
               )}
               name="logo_url"
@@ -391,6 +411,43 @@ const HandleAffiliate = () => {
               </div>
             </>
           )}
+          {/* Édition : le % de réduction (P) — directs uniquement (#9). Pour
+              une agence réseau, P est géré au niveau du réseau (P+S ≤ N). */}
+          {isEdit &&
+            (!data?.parent_affiliate_id && !data?.is_super_affiliate ? (
+              <div className={"flex-1 min-w-[200px]"}>
+                <label>Promo discount (P) </label>
+                <Controller
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }) => (
+                    <FormInput
+                      type={"number"}
+                      placeholder={"Enter promo discount"}
+                      value={value ?? ""}
+                      onChange={onChange}
+                      helperText={
+                        error?.message ||
+                        (data?.promo_code
+                          ? `Client discount of code ${data.promo_code}`
+                          : "Client discount %")
+                      }
+                      endAdornment={"%"}
+                    />
+                  )}
+                  name="promo_amount"
+                  control={control}
+                />
+              </div>
+            ) : data?.is_super_affiliate ? null : (
+              <div className={"flex-1 min-w-[200px] flex items-end"}>
+                <p className={"text-sm text-gray-500 pb-2"}>
+                  Client discount (P) is managed at the network level — edit it
+                  from the super-affiliate page.
+                </p>
+              </div>
+            ))}
         </div>
 
         {/* Rattachement direct à la création — super_admin uniquement
