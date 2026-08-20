@@ -641,7 +641,7 @@ const HandleAffiliate = () => {
             <div>
               <h6 className={"m-0"}>Co-branded shop</h6>
               <p className={"m-0 text-xs text-gray-500"}>
-                Shop in the partner's colors — applies immediately after
+                Shop in the partner&apos;s colors — applies immediately after
                 saving, clients still need the affiliate promo link.
               </p>
             </div>
