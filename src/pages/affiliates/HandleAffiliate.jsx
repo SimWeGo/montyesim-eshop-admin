@@ -132,6 +132,26 @@ const buildSchema = (isEdit) =>
       excludeEmptyString: true, message: "ISO code expected (e.g. EUR)" }).nullable(),
   });
 
+// Objet thème envoyé au PATCH : "" efface la clé côté backend (merge)
+const buildWsTheme = (payload) => ({
+  enabled: Boolean(payload?.ws_enabled),
+  display_name: payload?.ws_display_name?.trim() || "",
+  tab_title: payload?.ws_tab_title?.trim() || "",
+  primary_color: payload?.ws_primary_color?.trim() || "",
+  secondary_color: payload?.ws_secondary_color?.trim() || "",
+  background_color: payload?.ws_background_color?.trim() || "",
+  logo_url: payload?.ws_logo_url?.trim() || "",
+  header_image_url: payload?.ws_header_image_url?.trim() || "",
+  favicon_url: payload?.ws_favicon_url?.trim() || "",
+  subdomain: payload?.ws_subdomain?.trim()?.toLowerCase() || "",
+  default_language: payload?.ws_default_language || "",
+  default_currency: payload?.ws_default_currency?.trim()?.toUpperCase() || "",
+});
+
+// Un thème « vide » (tout à ""/false) ne justifie pas de PATCH post-création
+const wsThemeHasContent = (t) =>
+  t.enabled || Object.values(t).some((v) => v !== "" && v !== false);
+
 const HandleAffiliate = () => {
   const theme = useTheme();
   const asyncPaginateStyles = theme?.asyncPaginateStyles || {};
@@ -293,12 +313,29 @@ const HandleAffiliate = () => {
         // ARGENT (D5) : le back exige super_admin quand fourni (§A7)
         parent_super_affiliate_id: payload?.parent_super?.value || null,
       })
-        .then((res) => {
+        .then(async (res) => {
           if (res?.error) {
             toast.error(
               res?.errorCode ? `${res.error} [${res.errorCode}]` : res?.error
             );
           } else {
+            // Thème webstore saisi à la création → PATCH dans la foulée
+            // (l'endpoint create ne le porte pas). Un échec ici n'empêche
+            // JAMAIS l'affichage de la clé one-shot.
+            const wsTheme = buildWsTheme(payload);
+            if (res?.data?.affiliate_id && wsThemeHasContent(wsTheme)) {
+              const themeRes = await updateAffiliateRest(
+                res.data.affiliate_id,
+                { webstore_theme: wsTheme }
+              );
+              if (themeRes?.error) {
+                toast.warning(
+                  `Affiliate created, but the webstore theme was not saved` +
+                    (themeRes?.errorCode ? ` [${themeRes.errorCode}]` : "") +
+                    ` — edit the affiliate to retry.`
+                );
+              }
+            }
             // Clé one-shot : navigate(-1) SEULEMENT à la fermeture du modal
             setRevealedKey({
               open: true,
@@ -319,20 +356,7 @@ const HandleAffiliate = () => {
       }
       // Thème webstore : objet complet — "" efface la clé côté back (merge),
       // les valeurs préremplies non touchées sont renvoyées telles quelles.
-      editPayload.webstore_theme = {
-        enabled: Boolean(payload?.ws_enabled),
-        display_name: payload?.ws_display_name?.trim() || "",
-        tab_title: payload?.ws_tab_title?.trim() || "",
-        primary_color: payload?.ws_primary_color?.trim() || "",
-        secondary_color: payload?.ws_secondary_color?.trim() || "",
-        background_color: payload?.ws_background_color?.trim() || "",
-        logo_url: payload?.ws_logo_url?.trim() || "",
-        header_image_url: payload?.ws_header_image_url?.trim() || "",
-        favicon_url: payload?.ws_favicon_url?.trim() || "",
-        subdomain: payload?.ws_subdomain?.trim()?.toLowerCase() || "",
-        default_language: payload?.ws_default_language || "",
-        default_currency: payload?.ws_default_currency?.trim()?.toUpperCase() || "",
-      };
+      editPayload.webstore_theme = buildWsTheme(payload);
       updateAffiliateRest(id, editPayload)
         .then((res) => {
           if (res?.error) {
@@ -602,8 +626,8 @@ const HandleAffiliate = () => {
           </>
         )}
 
-        {/* ---------- Webstore co-brandé (étape 5) — édition seulement ---------- */}
-        {isEdit && (
+        {/* ---------- Webstore co-brandé (étape 5) — création ET édition ---------- */}
+        {(
           <>
             <div className="flex items-center">
               <div className="w-[20px] h-px bg-gray-300" />
