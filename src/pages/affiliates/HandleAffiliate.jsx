@@ -5,6 +5,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormHelperText,
+  Switch,
 } from "@mui/material";
 import { useTheme } from "@mui/styles";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -35,6 +36,13 @@ const WS_HEX_RE = /^#[0-9a-fA-F]{6}$/;
 const WS_SUBDOMAIN_RE = /^[a-z0-9][a-z0-9-]{1,62}$/;
 const WS_RESERVED = ["www", "api", "app", "admin", "affiliate", "mail"];
 const WS_LANGUAGES = ["en", "fr", "es", "nl", "ar"];
+
+// Intertitre de sous-groupe du panneau Webstore
+const WsGroupLabel = ({ children }) => (
+  <p className={"text-[11px] font-semibold uppercase tracking-wider text-gray-400 mt-2 mb-0"}>
+    {children}
+  </p>
+);
 
 // Champ couleur : pipette native synchronisée avec le champ texte #RRGGBB
 const ColorField = ({ name, label, control }) => (
@@ -627,182 +635,195 @@ const HandleAffiliate = () => {
         )}
 
         {/* ---------- Webstore co-brandé (étape 5) — création ET édition ---------- */}
-        {(
-          <>
-            <div className="flex items-center">
-              <div className="w-[20px] h-px bg-gray-300" />
-              <h6 className="px-2">Webstore (co-branded shop)</h6>
-              <div className="w-[20px] h-px bg-gray-300" />
+        <div className={"rounded-lg border border-gray-200 overflow-hidden"}>
+          {/* En-tête du panneau : titre + interrupteur d'activation */}
+          <div className={"flex flex-wrap items-center justify-between gap-2 bg-gray-50 px-4 py-3 border-b border-gray-200"}>
+            <div>
+              <h6 className={"m-0"}>Co-branded shop</h6>
+              <p className={"m-0 text-xs text-gray-500"}>
+                Shop in the partner's colors — applies immediately after
+                saving, clients still need the affiliate promo link.
+              </p>
             </div>
+            <Controller
+              name="ws_enabled"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <FormControlLabel
+                  className={"m-0"}
+                  control={
+                    <Switch
+                      checked={Boolean(value)}
+                      onChange={(e) => onChange(e.target.checked)}
+                    />
+                  }
+                  label={value ? "Enabled" : "Disabled"}
+                />
+              )}
+            />
+          </div>
 
-            <div className={"flex flex-wrap gap-[1rem]"}>
-              <div className={"flex-1 min-w-[200px] flex items-end"}>
-                <Controller
-                  name="ws_enabled"
-                  control={control}
-                  render={({ field: { onChange, value } }) => (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={Boolean(value)}
-                          onChange={(e) => onChange(e.target.checked)}
-                        />
-                      }
-                      label="Enable co-branded shop"
-                    />
-                  )}
-                />
+          {/* Champs visibles uniquement quand le webstore est activé */}
+          {watch("ws_enabled") ? (
+            <div className={"flex flex-col gap-[0.75rem] p-4"}>
+              <WsGroupLabel>Identity</WsGroupLabel>
+              <div className={"flex flex-wrap gap-[1rem]"}>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>Display name </label>
+                  <Controller
+                    name="ws_display_name"
+                    control={control}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <FormInput
+                        placeholder={"Shown in the shop header"}
+                        value={value}
+                        onChange={onChange}
+                        helperText={error?.message}
+                      />
+                    )}
+                  />
+                </div>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>Browser tab title </label>
+                  <Controller
+                    name="ws_tab_title"
+                    control={control}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <FormInput
+                        placeholder={"e.g. Yupwego eSIM"}
+                        value={value}
+                        onChange={onChange}
+                        helperText={error?.message}
+                      />
+                    )}
+                  />
+                </div>
               </div>
-              <div className={"flex-1 min-w-[200px]"}>
-                <label>Display name </label>
-                <Controller
-                  name="ws_display_name"
-                  control={control}
-                  render={({ field: { onChange, value }, fieldState: { error } }) => (
-                    <FormInput
-                      placeholder={"Shown in the shop header"}
-                      value={value}
-                      onChange={onChange}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
+
+              <WsGroupLabel>Brand colors</WsGroupLabel>
+              <div className={"flex flex-wrap gap-[1rem]"}>
+                <ColorField name="ws_primary_color" label="Primary" control={control} />
+                <ColorField name="ws_secondary_color" label="Secondary" control={control} />
+                <ColorField name="ws_background_color" label="Background" control={control} />
               </div>
-              <div className={"flex-1 min-w-[200px]"}>
-                <label>Browser tab title </label>
-                <Controller
-                  name="ws_tab_title"
-                  control={control}
-                  render={({ field: { onChange, value }, fieldState: { error } }) => (
-                    <FormInput
-                      placeholder={"e.g. Yupwego eSIM"}
-                      value={value}
-                      onChange={onChange}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
+
+              <WsGroupLabel>Images</WsGroupLabel>
+              <div className={"flex flex-wrap gap-[1rem]"}>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>Shop logo URL </label>
+                  <Controller
+                    name="ws_logo_url"
+                    control={control}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <FormInput
+                        placeholder={"https://…"}
+                        value={value}
+                        onChange={onChange}
+                        helperText={error?.message || "Replaces the SimWeGo logo"}
+                      />
+                    )}
+                  />
+                </div>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>Header image URL </label>
+                  <Controller
+                    name="ws_header_image_url"
+                    control={control}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <FormInput
+                        placeholder={"https://…"}
+                        value={value}
+                        onChange={onChange}
+                        helperText={
+                          error?.message ||
+                          "Full-width hero photo — 1920 × 640 px recommended"
+                        }
+                      />
+                    )}
+                  />
+                </div>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>Favicon URL </label>
+                  <Controller
+                    name="ws_favicon_url"
+                    control={control}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <FormInput
+                        placeholder={"https://…/favicon.png"}
+                        value={value}
+                        onChange={onChange}
+                        helperText={error?.message}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
+              <WsGroupLabel>Settings</WsGroupLabel>
+              <div className={"flex flex-wrap gap-[1rem]"}>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>Subdomain </label>
+                  <Controller
+                    name="ws_subdomain"
+                    control={control}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <FormInput
+                        placeholder={"e.g. yupwego"}
+                        value={value}
+                        onChange={onChange}
+                        helperText={
+                          error?.message ||
+                          "Reserved for later — subdomains are not live yet"
+                        }
+                      />
+                    )}
+                  />
+                </div>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>Default language </label>
+                  <Controller
+                    name="ws_default_language"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <select
+                        value={value || ""}
+                        onChange={(e) => onChange(e.target.value)}
+                        className={"mt-1 h-[38px] w-full rounded border border-gray-300 bg-white px-2"}
+                      >
+                        <option value="">— shop default —</option>
+                        {WS_LANGUAGES.map((l) => (
+                          <option key={l} value={l}>
+                            {l.toUpperCase()}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  />
+                </div>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>Default currency </label>
+                  <Controller
+                    name="ws_default_currency"
+                    control={control}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <FormInput
+                        placeholder={"e.g. EUR"}
+                        value={value}
+                        onChange={onChange}
+                        helperText={error?.message}
+                      />
+                    )}
+                  />
+                </div>
               </div>
             </div>
-
-            <div className={"flex flex-wrap gap-[1rem]"}>
-              <ColorField name="ws_primary_color" label="Primary color" control={control} />
-              <ColorField name="ws_secondary_color" label="Secondary color" control={control} />
-              <ColorField name="ws_background_color" label="Background color" control={control} />
-            </div>
-
-            <div className={"flex flex-wrap gap-[1rem]"}>
-              <div className={"flex-1 min-w-[200px]"}>
-                <label>Shop logo URL </label>
-                <Controller
-                  name="ws_logo_url"
-                  control={control}
-                  render={({ field: { onChange, value }, fieldState: { error } }) => (
-                    <FormInput
-                      placeholder={"https://… (replaces the SimWeGo logo)"}
-                      value={value}
-                      onChange={onChange}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
-              </div>
-              <div className={"flex-1 min-w-[200px]"}>
-                <label>Header image URL </label>
-                <Controller
-                  name="ws_header_image_url"
-                  control={control}
-                  render={({ field: { onChange, value }, fieldState: { error } }) => (
-                    <FormInput
-                      placeholder={"https://… (hero background photo)"}
-                      value={value}
-                      onChange={onChange}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
-              </div>
-              <div className={"flex-1 min-w-[200px]"}>
-                <label>Favicon URL </label>
-                <Controller
-                  name="ws_favicon_url"
-                  control={control}
-                  render={({ field: { onChange, value }, fieldState: { error } }) => (
-                    <FormInput
-                      placeholder={"https://…/favicon.png"}
-                      value={value}
-                      onChange={onChange}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className={"flex flex-wrap gap-[1rem]"}>
-              <div className={"flex-1 min-w-[200px]"}>
-                <label>Subdomain </label>
-                <Controller
-                  name="ws_subdomain"
-                  control={control}
-                  render={({ field: { onChange, value }, fieldState: { error } }) => (
-                    <FormInput
-                      placeholder={"e.g. yupwego"}
-                      value={value}
-                      onChange={onChange}
-                      helperText={
-                        error?.message ||
-                        "Reserved for later — subdomains are not live yet"
-                      }
-                    />
-                  )}
-                />
-              </div>
-              <div className={"flex-1 min-w-[200px]"}>
-                <label>Default language </label>
-                <Controller
-                  name="ws_default_language"
-                  control={control}
-                  render={({ field: { onChange, value } }) => (
-                    <select
-                      value={value || ""}
-                      onChange={(e) => onChange(e.target.value)}
-                      className={"mt-1 h-[38px] w-full rounded border border-gray-300 bg-white px-2"}
-                    >
-                      <option value="">— shop default —</option>
-                      {WS_LANGUAGES.map((l) => (
-                        <option key={l} value={l}>
-                          {l.toUpperCase()}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                />
-              </div>
-              <div className={"flex-1 min-w-[200px]"}>
-                <label>Default currency </label>
-                <Controller
-                  name="ws_default_currency"
-                  control={control}
-                  render={({ field: { onChange, value }, fieldState: { error } }) => (
-                    <FormInput
-                      placeholder={"e.g. EUR"}
-                      value={value}
-                      onChange={onChange}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            <FormHelperText>
-              Changes apply on the shop immediately after saving — no deploy.
-              The shop only uses the theme when “Enable co-branded shop” is
-              checked; clients still need the affiliate promo link.
-            </FormHelperText>
-          </>
-        )}
+          ) : (
+            <p className={"m-0 px-4 py-3 text-sm text-gray-400"}>
+              Turn it on to configure colors, logo and hero image. Saved
+              values are kept when disabled.
+            </p>
+          )}
+        </div>
 
         <div className={"flex flex-wrap gap-[1rem]"}>
           <div className={"flex-1 min-w-[200px]"}>
