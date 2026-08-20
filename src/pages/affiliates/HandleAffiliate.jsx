@@ -30,6 +30,42 @@ import { formatRate } from "../../core/helpers/formatCurrency";
 const emptyToNull = (value, original) =>
   original === "" || original === null ? null : value;
 
+// --- Webstore co-brandé (étape 5) — mêmes règles que le backend ---
+const WS_HEX_RE = /^#[0-9a-fA-F]{6}$/;
+const WS_SUBDOMAIN_RE = /^[a-z0-9][a-z0-9-]{1,62}$/;
+const WS_RESERVED = ["www", "api", "app", "admin", "affiliate", "mail"];
+const WS_LANGUAGES = ["en", "fr", "es", "nl", "ar"];
+
+// Champ couleur : pipette native synchronisée avec le champ texte #RRGGBB
+const ColorField = ({ name, label, control }) => (
+  <div className={"flex-1 min-w-[200px]"}>
+    <label>{label} </label>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field: { onChange, value }, fieldState: { error } }) => (
+        <div className={"flex flex-row items-start gap-[0.5rem]"}>
+          <input
+            type="color"
+            aria-label={`${label} picker`}
+            value={WS_HEX_RE.test(value || "") ? value : "#ffffff"}
+            onChange={(e) => onChange(e.target.value)}
+            className={"mt-1 h-[38px] w-[46px] cursor-pointer rounded border border-gray-300 bg-white p-0.5"}
+          />
+          <div className={"flex-1"}>
+            <FormInput
+              placeholder={"#RRGGBB (empty = default)"}
+              value={value}
+              onChange={onChange}
+              helperText={error?.message}
+            />
+          </div>
+        </div>
+      )}
+    />
+  </div>
+);
+
 const buildSchema = (isEdit) =>
   yup.object().shape({
     name: yup.string().label("Name").min(2).max(60).required().nullable(),
@@ -68,6 +104,32 @@ const buildSchema = (isEdit) =>
     parent_super: yup.object().label("Super-affiliate").nullable(),
     notes: yup.string().label("Notes").max(500).nullable(),
     is_active: yup.boolean().nullable(),
+    // --- Webstore co-brandé (édition seulement ; le back re-valide tout) ---
+    ws_enabled: yup.boolean().nullable(),
+    ws_display_name: yup.string().label("Display name").max(60).nullable(),
+    ws_tab_title: yup.string().label("Tab title").max(60).nullable(),
+    ws_primary_color: yup.string().matches(WS_HEX_RE, {
+      excludeEmptyString: true, message: "Expected #RRGGBB" }).nullable(),
+    ws_secondary_color: yup.string().matches(WS_HEX_RE, {
+      excludeEmptyString: true, message: "Expected #RRGGBB" }).nullable(),
+    ws_background_color: yup.string().matches(WS_HEX_RE, {
+      excludeEmptyString: true, message: "Expected #RRGGBB" }).nullable(),
+    ws_logo_url: yup.string().matches(/^https:\/\/.+/, {
+      excludeEmptyString: true, message: "https:// URL expected" }).max(500).nullable(),
+    ws_header_image_url: yup.string().matches(/^https:\/\/.+/, {
+      excludeEmptyString: true, message: "https:// URL expected" }).max(500).nullable(),
+    ws_favicon_url: yup.string().matches(/^https:\/\/.+/, {
+      excludeEmptyString: true, message: "https:// URL expected" }).max(500).nullable(),
+    ws_subdomain: yup.string()
+      .notOneOf(WS_RESERVED, "Reserved subdomain")
+      .matches(WS_SUBDOMAIN_RE, {
+        excludeEmptyString: true,
+        message: "Lowercase letters, digits and dashes only",
+      })
+      .nullable(),
+    ws_default_language: yup.string().oneOf(["", ...WS_LANGUAGES, null]).nullable(),
+    ws_default_currency: yup.string().matches(/^[A-Z]{3}$/, {
+      excludeEmptyString: true, message: "ISO code expected (e.g. EUR)" }).nullable(),
   });
 
 const HandleAffiliate = () => {
@@ -107,6 +169,18 @@ const HandleAffiliate = () => {
       parent_super: null,
       notes: "",
       is_active: true,
+      ws_enabled: false,
+      ws_display_name: "",
+      ws_tab_title: "",
+      ws_primary_color: "",
+      ws_secondary_color: "",
+      ws_background_color: "",
+      ws_logo_url: "",
+      ws_header_image_url: "",
+      ws_favicon_url: "",
+      ws_subdomain: "",
+      ws_default_language: "",
+      ws_default_currency: "",
     },
     resolver: yupResolver(buildSchema(isEdit)),
     mode: "all",
@@ -133,6 +207,19 @@ const HandleAffiliate = () => {
               parent_super: null,
               notes: res?.data?.notes || "",
               is_active: res?.data?.is_active ?? true,
+              // Thème webstore : préremplissage depuis le jsonb (étape 5)
+              ws_enabled: Boolean(res?.data?.webstore_theme?.enabled),
+              ws_display_name: res?.data?.webstore_theme?.display_name || "",
+              ws_tab_title: res?.data?.webstore_theme?.tab_title || "",
+              ws_primary_color: res?.data?.webstore_theme?.primary_color || "",
+              ws_secondary_color: res?.data?.webstore_theme?.secondary_color || "",
+              ws_background_color: res?.data?.webstore_theme?.background_color || "",
+              ws_logo_url: res?.data?.webstore_theme?.logo_url || "",
+              ws_header_image_url: res?.data?.webstore_theme?.header_image_url || "",
+              ws_favicon_url: res?.data?.webstore_theme?.favicon_url || "",
+              ws_subdomain: res?.data?.webstore_theme?.subdomain || "",
+              ws_default_language: res?.data?.webstore_theme?.default_language || "",
+              ws_default_currency: res?.data?.webstore_theme?.default_currency || "",
             });
           } else {
             setData(null);
@@ -230,6 +317,22 @@ const HandleAffiliate = () => {
       if (isDirect && payload?.promo_amount != null && payload?.promo_amount !== "") {
         editPayload.promo_amount = Number(payload?.promo_amount);
       }
+      // Thème webstore : objet complet — "" efface la clé côté back (merge),
+      // les valeurs préremplies non touchées sont renvoyées telles quelles.
+      editPayload.webstore_theme = {
+        enabled: Boolean(payload?.ws_enabled),
+        display_name: payload?.ws_display_name?.trim() || "",
+        tab_title: payload?.ws_tab_title?.trim() || "",
+        primary_color: payload?.ws_primary_color?.trim() || "",
+        secondary_color: payload?.ws_secondary_color?.trim() || "",
+        background_color: payload?.ws_background_color?.trim() || "",
+        logo_url: payload?.ws_logo_url?.trim() || "",
+        header_image_url: payload?.ws_header_image_url?.trim() || "",
+        favicon_url: payload?.ws_favicon_url?.trim() || "",
+        subdomain: payload?.ws_subdomain?.trim()?.toLowerCase() || "",
+        default_language: payload?.ws_default_language || "",
+        default_currency: payload?.ws_default_currency?.trim()?.toUpperCase() || "",
+      };
       updateAffiliateRest(id, editPayload)
         .then((res) => {
           if (res?.error) {
@@ -496,6 +599,184 @@ const HandleAffiliate = () => {
                 )}
               </div>
             </div>
+          </>
+        )}
+
+        {/* ---------- Webstore co-brandé (étape 5) — édition seulement ---------- */}
+        {isEdit && (
+          <>
+            <div className="flex items-center">
+              <div className="w-[20px] h-px bg-gray-300" />
+              <h6 className="px-2">Webstore (co-branded shop)</h6>
+              <div className="w-[20px] h-px bg-gray-300" />
+            </div>
+
+            <div className={"flex flex-wrap gap-[1rem]"}>
+              <div className={"flex-1 min-w-[200px] flex items-end"}>
+                <Controller
+                  name="ws_enabled"
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={Boolean(value)}
+                          onChange={(e) => onChange(e.target.checked)}
+                        />
+                      }
+                      label="Enable co-branded shop"
+                    />
+                  )}
+                />
+              </div>
+              <div className={"flex-1 min-w-[200px]"}>
+                <label>Display name </label>
+                <Controller
+                  name="ws_display_name"
+                  control={control}
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <FormInput
+                      placeholder={"Shown in the shop header"}
+                      value={value}
+                      onChange={onChange}
+                      helperText={error?.message}
+                    />
+                  )}
+                />
+              </div>
+              <div className={"flex-1 min-w-[200px]"}>
+                <label>Browser tab title </label>
+                <Controller
+                  name="ws_tab_title"
+                  control={control}
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <FormInput
+                      placeholder={"e.g. Yupwego eSIM"}
+                      value={value}
+                      onChange={onChange}
+                      helperText={error?.message}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className={"flex flex-wrap gap-[1rem]"}>
+              <ColorField name="ws_primary_color" label="Primary color" control={control} />
+              <ColorField name="ws_secondary_color" label="Secondary color" control={control} />
+              <ColorField name="ws_background_color" label="Background color" control={control} />
+            </div>
+
+            <div className={"flex flex-wrap gap-[1rem]"}>
+              <div className={"flex-1 min-w-[200px]"}>
+                <label>Shop logo URL </label>
+                <Controller
+                  name="ws_logo_url"
+                  control={control}
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <FormInput
+                      placeholder={"https://… (replaces the SimWeGo logo)"}
+                      value={value}
+                      onChange={onChange}
+                      helperText={error?.message}
+                    />
+                  )}
+                />
+              </div>
+              <div className={"flex-1 min-w-[200px]"}>
+                <label>Header image URL </label>
+                <Controller
+                  name="ws_header_image_url"
+                  control={control}
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <FormInput
+                      placeholder={"https://… (hero background photo)"}
+                      value={value}
+                      onChange={onChange}
+                      helperText={error?.message}
+                    />
+                  )}
+                />
+              </div>
+              <div className={"flex-1 min-w-[200px]"}>
+                <label>Favicon URL </label>
+                <Controller
+                  name="ws_favicon_url"
+                  control={control}
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <FormInput
+                      placeholder={"https://…/favicon.png"}
+                      value={value}
+                      onChange={onChange}
+                      helperText={error?.message}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className={"flex flex-wrap gap-[1rem]"}>
+              <div className={"flex-1 min-w-[200px]"}>
+                <label>Subdomain </label>
+                <Controller
+                  name="ws_subdomain"
+                  control={control}
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <FormInput
+                      placeholder={"e.g. yupwego"}
+                      value={value}
+                      onChange={onChange}
+                      helperText={
+                        error?.message ||
+                        "Reserved for later — subdomains are not live yet"
+                      }
+                    />
+                  )}
+                />
+              </div>
+              <div className={"flex-1 min-w-[200px]"}>
+                <label>Default language </label>
+                <Controller
+                  name="ws_default_language"
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <select
+                      value={value || ""}
+                      onChange={(e) => onChange(e.target.value)}
+                      className={"mt-1 h-[38px] w-full rounded border border-gray-300 bg-white px-2"}
+                    >
+                      <option value="">— shop default —</option>
+                      {WS_LANGUAGES.map((l) => (
+                        <option key={l} value={l}>
+                          {l.toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                />
+              </div>
+              <div className={"flex-1 min-w-[200px]"}>
+                <label>Default currency </label>
+                <Controller
+                  name="ws_default_currency"
+                  control={control}
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <FormInput
+                      placeholder={"e.g. EUR"}
+                      value={value}
+                      onChange={onChange}
+                      helperText={error?.message}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
+            <FormHelperText>
+              Changes apply on the shop immediately after saving — no deploy.
+              The shop only uses the theme when “Enable co-branded shop” is
+              checked; clients still need the affiliate promo link.
+            </FormHelperText>
           </>
         )}
 
