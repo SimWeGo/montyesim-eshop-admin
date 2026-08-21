@@ -138,6 +138,10 @@ const buildSchema = (isEdit) =>
     ws_default_language: yup.string().oneOf(["", ...WS_LANGUAGES, null]).nullable(),
     ws_default_currency: yup.string().matches(/^[A-Z]{3}$/, {
       excludeEmptyString: true, message: "ISO code expected (e.g. EUR)" }).nullable(),
+    ws_guide_ios_url: yup.string().matches(/^https:\/\/.+/, {
+      excludeEmptyString: true, message: "https:// URL expected" }).max(500).nullable(),
+    ws_guide_android_url: yup.string().matches(/^https:\/\/.+/, {
+      excludeEmptyString: true, message: "https:// URL expected" }).max(500).nullable(),
   });
 
 // Objet thème envoyé au PATCH : "" efface la clé côté backend (merge)
@@ -154,6 +158,8 @@ const buildWsTheme = (payload) => ({
   subdomain: payload?.ws_subdomain?.trim()?.toLowerCase() || "",
   default_language: payload?.ws_default_language || "",
   default_currency: payload?.ws_default_currency?.trim()?.toUpperCase() || "",
+  guide_ios_url: payload?.ws_guide_ios_url?.trim() || "",
+  guide_android_url: payload?.ws_guide_android_url?.trim() || "",
 });
 
 // Un thème « vide » (tout à ""/false) ne justifie pas de PATCH post-création
@@ -209,6 +215,8 @@ const HandleAffiliate = () => {
       ws_subdomain: "",
       ws_default_language: "",
       ws_default_currency: "",
+      ws_guide_ios_url: "",
+      ws_guide_android_url: "",
     },
     resolver: yupResolver(buildSchema(isEdit)),
     mode: "all",
@@ -248,6 +256,8 @@ const HandleAffiliate = () => {
               ws_subdomain: res?.data?.webstore_theme?.subdomain || "",
               ws_default_language: res?.data?.webstore_theme?.default_language || "",
               ws_default_currency: res?.data?.webstore_theme?.default_currency || "",
+              ws_guide_ios_url: res?.data?.webstore_theme?.guide_ios_url || "",
+              ws_guide_android_url: res?.data?.webstore_theme?.guide_android_url || "",
             });
           } else {
             setData(null);
@@ -811,6 +821,46 @@ const HandleAffiliate = () => {
                         value={value}
                         onChange={onChange}
                         helperText={error?.message}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
+              <WsGroupLabel>Client guides (purchase email)</WsGroupLabel>
+              <div className={"flex flex-wrap gap-[1rem]"}>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>iOS guide PDF URL </label>
+                  <Controller
+                    name="ws_guide_ios_url"
+                    control={control}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <FormInput
+                        placeholder={"https://…/guide-ios.pdf"}
+                        value={value}
+                        onChange={onChange}
+                        helperText={
+                          error?.message ||
+                          "“iOS guide” button in the purchase email"
+                        }
+                      />
+                    )}
+                  />
+                </div>
+                <div className={"flex-1 min-w-[200px]"}>
+                  <label>Android guide PDF URL </label>
+                  <Controller
+                    name="ws_guide_android_url"
+                    control={control}
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                      <FormInput
+                        placeholder={"https://…/guide-android.pdf"}
+                        value={value}
+                        onChange={onChange}
+                        helperText={
+                          error?.message ||
+                          "“Android guide” button in the purchase email"
+                        }
                       />
                     )}
                   />
